@@ -1,0 +1,1352 @@
+select '''{
+  "integer":{
+    "value": 40,
+    "array": [39, 40, 38],
+    "where": [{ "code": "value", "value": 40 },
+              { "code": "array", "array": [39, 40, 38] },
+              { "code": "where",
+                "where": [ {"code": "value", "value": 40},
+                           {"code": "array", "array": [39, 40, 38]} ] } ] },
+  "noise": "Some value"
+}''' resource \gset
+DO language plpgsql $$ BEGIN RAISE info 'number .integer.value integer'; END $$;
+SELECT fhirpath_as_number(:resource, '.integer.value', 'integer' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .integer.array integer'; END $$;
+SELECT fhirpath_as_number(:resource, '.integer.array', 'integer' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .integer.where.where(code=value).value integer'; END $$;
+SELECT fhirpath_as_number(:resource, '.integer.where.where(code=value).value', 'integer' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .integer.where.where(code=array).array integer'; END $$;
+SELECT fhirpath_as_number(:resource, '.integer.where.where(code=array).array', 'integer' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .integer.where.where(code=where).where.where(code=value).value integer'; END $$;
+SELECT fhirpath_as_number(:resource, '.integer.where.where(code=where).where.where(code=value).value', 'integer' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .integer.where.where(code=where).where.where(code=array).array integer'; END $$;
+SELECT fhirpath_as_number(:resource, '.integer.where.where(code=where).where.where(code=array).array', 'integer' , 'max');
+select '''{
+  "unsignedInt":{
+    "value": 40,
+    "array": [39, 40, 38],
+    "where": [{ "code": "value", "value": 40 },
+              { "code": "array", "array": [39, 40, 38] },
+              { "code": "where",
+                "where": [ {"code": "value", "value": 40},
+                           {"code": "array", "array": [39, 40, 38]} ] } ] },
+  "noise": "Some value"
+}''' resource \gset
+DO language plpgsql $$ BEGIN RAISE info 'number .unsignedInt.value unsignedInt'; END $$;
+SELECT fhirpath_as_number(:resource, '.unsignedInt.value', 'unsignedInt' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .unsignedInt.array unsignedInt'; END $$;
+SELECT fhirpath_as_number(:resource, '.unsignedInt.array', 'unsignedInt' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .unsignedInt.where.where(code=value).value unsignedInt'; END $$;
+SELECT fhirpath_as_number(:resource, '.unsignedInt.where.where(code=value).value', 'unsignedInt' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .unsignedInt.where.where(code=array).array unsignedInt'; END $$;
+SELECT fhirpath_as_number(:resource, '.unsignedInt.where.where(code=array).array', 'unsignedInt' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .unsignedInt.where.where(code=where).where.where(code=value).value unsignedInt'; END $$;
+SELECT fhirpath_as_number(:resource, '.unsignedInt.where.where(code=where).where.where(code=value).value', 'unsignedInt' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .unsignedInt.where.where(code=where).where.where(code=array).array unsignedInt'; END $$;
+SELECT fhirpath_as_number(:resource, '.unsignedInt.where.where(code=where).where.where(code=array).array', 'unsignedInt' , 'max');
+select '''{
+  "positiveInt":{
+    "value": 40,
+    "array": [39, 40, 38],
+    "where": [{ "code": "value", "value": 40 },
+              { "code": "array", "array": [39, 40, 38] },
+              { "code": "where",
+                "where": [ {"code": "value", "value": 40},
+                           {"code": "array", "array": [39, 40, 38]} ] } ] },
+  "noise": "Some value"
+}''' resource \gset
+DO language plpgsql $$ BEGIN RAISE info 'number .positiveInt.value positiveInt'; END $$;
+SELECT fhirpath_as_number(:resource, '.positiveInt.value', 'positiveInt' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .positiveInt.array positiveInt'; END $$;
+SELECT fhirpath_as_number(:resource, '.positiveInt.array', 'positiveInt' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .positiveInt.where.where(code=value).value positiveInt'; END $$;
+SELECT fhirpath_as_number(:resource, '.positiveInt.where.where(code=value).value', 'positiveInt' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .positiveInt.where.where(code=array).array positiveInt'; END $$;
+SELECT fhirpath_as_number(:resource, '.positiveInt.where.where(code=array).array', 'positiveInt' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .positiveInt.where.where(code=where).where.where(code=value).value positiveInt'; END $$;
+SELECT fhirpath_as_number(:resource, '.positiveInt.where.where(code=where).where.where(code=value).value', 'positiveInt' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .positiveInt.where.where(code=where).where.where(code=array).array positiveInt'; END $$;
+SELECT fhirpath_as_number(:resource, '.positiveInt.where.where(code=where).where.where(code=array).array', 'positiveInt' , 'max');
+select '''{
+  "Quantity":{
+    "value": {
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},
+    "array": [
+{
+	"value": 30,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 20,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+} ],
+    "where": [{ "code": "value", "value": {
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+} },
+              { "code": "array", "array": [
+{
+	"value": 30,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 20,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+} ] },
+              { "code": "where",
+                "where": [ {"code": "value", "value": {
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+}},
+                           {"code": "array", "array": [
+{
+	"value": 30,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 20,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+} ]} ] } ] },
+  "noise": "Some value"
+}''' resource \gset
+DO language plpgsql $$ BEGIN RAISE info 'number .Quantity.value Quantity'; END $$;
+SELECT fhirpath_as_number(:resource, '.Quantity.value', 'Quantity' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .Quantity.array Quantity'; END $$;
+SELECT fhirpath_as_number(:resource, '.Quantity.array', 'Quantity' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .Quantity.where.where(code=value).value Quantity'; END $$;
+SELECT fhirpath_as_number(:resource, '.Quantity.where.where(code=value).value', 'Quantity' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .Quantity.where.where(code=array).array Quantity'; END $$;
+SELECT fhirpath_as_number(:resource, '.Quantity.where.where(code=array).array', 'Quantity' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .Quantity.where.where(code=where).where.where(code=value).value Quantity'; END $$;
+SELECT fhirpath_as_number(:resource, '.Quantity.where.where(code=where).where.where(code=value).value', 'Quantity' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .Quantity.where.where(code=where).where.where(code=array).array Quantity'; END $$;
+SELECT fhirpath_as_number(:resource, '.Quantity.where.where(code=where).where.where(code=array).array', 'Quantity' , 'max');
+select '''{
+  "Age":{
+    "value": {
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},
+    "array": [
+{
+	"value": 30,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 20,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+} ],
+    "where": [{ "code": "value", "value": {
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+} },
+              { "code": "array", "array": [
+{
+	"value": 30,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 20,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+} ] },
+              { "code": "where",
+                "where": [ {"code": "value", "value": {
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+}},
+                           {"code": "array", "array": [
+{
+	"value": 30,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 20,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+} ]} ] } ] },
+  "noise": "Some value"
+}''' resource \gset
+DO language plpgsql $$ BEGIN RAISE info 'number .Age.value Age'; END $$;
+SELECT fhirpath_as_number(:resource, '.Age.value', 'Age' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .Age.array Age'; END $$;
+SELECT fhirpath_as_number(:resource, '.Age.array', 'Age' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .Age.where.where(code=value).value Age'; END $$;
+SELECT fhirpath_as_number(:resource, '.Age.where.where(code=value).value', 'Age' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .Age.where.where(code=array).array Age'; END $$;
+SELECT fhirpath_as_number(:resource, '.Age.where.where(code=array).array', 'Age' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .Age.where.where(code=where).where.where(code=value).value Age'; END $$;
+SELECT fhirpath_as_number(:resource, '.Age.where.where(code=where).where.where(code=value).value', 'Age' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .Age.where.where(code=where).where.where(code=array).array Age'; END $$;
+SELECT fhirpath_as_number(:resource, '.Age.where.where(code=where).where.where(code=array).array', 'Age' , 'max');
+select '''{
+  "Distance":{
+    "value": {
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},
+    "array": [
+{
+	"value": 30,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 20,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+} ],
+    "where": [{ "code": "value", "value": {
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+} },
+              { "code": "array", "array": [
+{
+	"value": 30,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 20,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+} ] },
+              { "code": "where",
+                "where": [ {"code": "value", "value": {
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+}},
+                           {"code": "array", "array": [
+{
+	"value": 30,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 20,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+} ]} ] } ] },
+  "noise": "Some value"
+}''' resource \gset
+DO language plpgsql $$ BEGIN RAISE info 'number .Distance.value Distance'; END $$;
+SELECT fhirpath_as_number(:resource, '.Distance.value', 'Distance' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .Distance.array Distance'; END $$;
+SELECT fhirpath_as_number(:resource, '.Distance.array', 'Distance' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .Distance.where.where(code=value).value Distance'; END $$;
+SELECT fhirpath_as_number(:resource, '.Distance.where.where(code=value).value', 'Distance' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .Distance.where.where(code=array).array Distance'; END $$;
+SELECT fhirpath_as_number(:resource, '.Distance.where.where(code=array).array', 'Distance' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .Distance.where.where(code=where).where.where(code=value).value Distance'; END $$;
+SELECT fhirpath_as_number(:resource, '.Distance.where.where(code=where).where.where(code=value).value', 'Distance' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .Distance.where.where(code=where).where.where(code=array).array Distance'; END $$;
+SELECT fhirpath_as_number(:resource, '.Distance.where.where(code=where).where.where(code=array).array', 'Distance' , 'max');
+select '''{
+  "SimpleQuantity":{
+    "value": {
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},
+    "array": [
+{
+	"value": 30,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 20,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+} ],
+    "where": [{ "code": "value", "value": {
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+} },
+              { "code": "array", "array": [
+{
+	"value": 30,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 20,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+} ] },
+              { "code": "where",
+                "where": [ {"code": "value", "value": {
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+}},
+                           {"code": "array", "array": [
+{
+	"value": 30,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 20,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+} ]} ] } ] },
+  "noise": "Some value"
+}''' resource \gset
+DO language plpgsql $$ BEGIN RAISE info 'number .SimpleQuantity.value SimpleQuantity'; END $$;
+SELECT fhirpath_as_number(:resource, '.SimpleQuantity.value', 'SimpleQuantity' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .SimpleQuantity.array SimpleQuantity'; END $$;
+SELECT fhirpath_as_number(:resource, '.SimpleQuantity.array', 'SimpleQuantity' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .SimpleQuantity.where.where(code=value).value SimpleQuantity'; END $$;
+SELECT fhirpath_as_number(:resource, '.SimpleQuantity.where.where(code=value).value', 'SimpleQuantity' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .SimpleQuantity.where.where(code=array).array SimpleQuantity'; END $$;
+SELECT fhirpath_as_number(:resource, '.SimpleQuantity.where.where(code=array).array', 'SimpleQuantity' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .SimpleQuantity.where.where(code=where).where.where(code=value).value SimpleQuantity'; END $$;
+SELECT fhirpath_as_number(:resource, '.SimpleQuantity.where.where(code=where).where.where(code=value).value', 'SimpleQuantity' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .SimpleQuantity.where.where(code=where).where.where(code=array).array SimpleQuantity'; END $$;
+SELECT fhirpath_as_number(:resource, '.SimpleQuantity.where.where(code=where).where.where(code=array).array', 'SimpleQuantity' , 'max');
+select '''{
+  "Duration":{
+    "value": {
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},
+    "array": [
+{
+	"value": 30,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 20,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+} ],
+    "where": [{ "code": "value", "value": {
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+} },
+              { "code": "array", "array": [
+{
+	"value": 30,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 20,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+} ] },
+              { "code": "where",
+                "where": [ {"code": "value", "value": {
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+}},
+                           {"code": "array", "array": [
+{
+	"value": 30,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 20,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+} ]} ] } ] },
+  "noise": "Some value"
+}''' resource \gset
+DO language plpgsql $$ BEGIN RAISE info 'number .Duration.value Duration'; END $$;
+SELECT fhirpath_as_number(:resource, '.Duration.value', 'Duration' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .Duration.array Duration'; END $$;
+SELECT fhirpath_as_number(:resource, '.Duration.array', 'Duration' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .Duration.where.where(code=value).value Duration'; END $$;
+SELECT fhirpath_as_number(:resource, '.Duration.where.where(code=value).value', 'Duration' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .Duration.where.where(code=array).array Duration'; END $$;
+SELECT fhirpath_as_number(:resource, '.Duration.where.where(code=array).array', 'Duration' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .Duration.where.where(code=where).where.where(code=value).value Duration'; END $$;
+SELECT fhirpath_as_number(:resource, '.Duration.where.where(code=where).where.where(code=value).value', 'Duration' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .Duration.where.where(code=where).where.where(code=array).array Duration'; END $$;
+SELECT fhirpath_as_number(:resource, '.Duration.where.where(code=where).where.where(code=array).array', 'Duration' , 'max');
+select '''{
+  "Count":{
+    "value": {
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},
+    "array": [
+{
+	"value": 30,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 20,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+} ],
+    "where": [{ "code": "value", "value": {
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+} },
+              { "code": "array", "array": [
+{
+	"value": 30,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 20,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+} ] },
+              { "code": "where",
+                "where": [ {"code": "value", "value": {
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+}},
+                           {"code": "array", "array": [
+{
+	"value": 30,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 20,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+} ]} ] } ] },
+  "noise": "Some value"
+}''' resource \gset
+DO language plpgsql $$ BEGIN RAISE info 'number .Count.value Count'; END $$;
+SELECT fhirpath_as_number(:resource, '.Count.value', 'Count' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .Count.array Count'; END $$;
+SELECT fhirpath_as_number(:resource, '.Count.array', 'Count' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .Count.where.where(code=value).value Count'; END $$;
+SELECT fhirpath_as_number(:resource, '.Count.where.where(code=value).value', 'Count' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .Count.where.where(code=array).array Count'; END $$;
+SELECT fhirpath_as_number(:resource, '.Count.where.where(code=array).array', 'Count' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .Count.where.where(code=where).where.where(code=value).value Count'; END $$;
+SELECT fhirpath_as_number(:resource, '.Count.where.where(code=where).where.where(code=value).value', 'Count' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .Count.where.where(code=where).where.where(code=array).array Count'; END $$;
+SELECT fhirpath_as_number(:resource, '.Count.where.where(code=where).where.where(code=array).array', 'Count' , 'max');
+select '''{
+  "Money":{
+    "value": {
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},
+    "array": [
+{
+	"value": 30,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 20,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+} ],
+    "where": [{ "code": "value", "value": {
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+} },
+              { "code": "array", "array": [
+{
+	"value": 30,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 20,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+} ] },
+              { "code": "where",
+                "where": [ {"code": "value", "value": {
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+}},
+                           {"code": "array", "array": [
+{
+	"value": 30,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 20,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+} ]} ] } ] },
+  "noise": "Some value"
+}''' resource \gset
+DO language plpgsql $$ BEGIN RAISE info 'number .Money.value Money'; END $$;
+SELECT fhirpath_as_number(:resource, '.Money.value', 'Money' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .Money.array Money'; END $$;
+SELECT fhirpath_as_number(:resource, '.Money.array', 'Money' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .Money.where.where(code=value).value Money'; END $$;
+SELECT fhirpath_as_number(:resource, '.Money.where.where(code=value).value', 'Money' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .Money.where.where(code=array).array Money'; END $$;
+SELECT fhirpath_as_number(:resource, '.Money.where.where(code=array).array', 'Money' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .Money.where.where(code=where).where.where(code=value).value Money'; END $$;
+SELECT fhirpath_as_number(:resource, '.Money.where.where(code=where).where.where(code=value).value', 'Money' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'number .Money.where.where(code=where).where.where(code=array).array Money'; END $$;
+SELECT fhirpath_as_number(:resource, '.Money.where.where(code=where).where.where(code=array).array', 'Money' , 'max');
+select '''{
+  "date":{
+    "value": "1991-12",
+    "array": ["1985-05", "1991-12", "1989-05"],
+    "where": [{ "code": "value", "value": "1991-12" },
+              { "code": "array", "array": ["1985-05", "1991-12", "1989-05"] },
+              { "code": "where",
+                "where": [ {"code": "value", "value": "1991-12"},
+                           {"code": "array", "array": ["1985-05", "1991-12", "1989-05"]} ] } ] },
+  "noise": "Some value"
+}''' resource \gset
+DO language plpgsql $$ BEGIN RAISE info 'date .date.value date'; END $$;
+SELECT fhirpath_as_date(:resource, '.date.value', 'date' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'date .date.array date'; END $$;
+SELECT fhirpath_as_date(:resource, '.date.array', 'date' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'date .date.where.where(code=value).value date'; END $$;
+SELECT fhirpath_as_date(:resource, '.date.where.where(code=value).value', 'date' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'date .date.where.where(code=array).array date'; END $$;
+SELECT fhirpath_as_date(:resource, '.date.where.where(code=array).array', 'date' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'date .date.where.where(code=where).where.where(code=value).value date'; END $$;
+SELECT fhirpath_as_date(:resource, '.date.where.where(code=where).where.where(code=value).value', 'date' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'date .date.where.where(code=where).where.where(code=array).array date'; END $$;
+SELECT fhirpath_as_date(:resource, '.date.where.where(code=where).where.where(code=array).array', 'date' , 'max');
+select '''{
+  "dateTime":{
+    "value": "1991-12-31",
+    "array": ["1981-11-12", "1991-12-31", "1990-12-31"],
+    "where": [{ "code": "value", "value": "1991-12-31" },
+              { "code": "array", "array": ["1981-11-12", "1991-12-31", "1990-12-31"] },
+              { "code": "where",
+                "where": [ {"code": "value", "value": "1991-12-31"},
+                           {"code": "array", "array": ["1981-11-12", "1991-12-31", "1990-12-31"]} ] } ] },
+  "noise": "Some value"
+}''' resource \gset
+DO language plpgsql $$ BEGIN RAISE info 'date .dateTime.value dateTime'; END $$;
+SELECT fhirpath_as_date(:resource, '.dateTime.value', 'dateTime' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'date .dateTime.array dateTime'; END $$;
+SELECT fhirpath_as_date(:resource, '.dateTime.array', 'dateTime' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'date .dateTime.where.where(code=value).value dateTime'; END $$;
+SELECT fhirpath_as_date(:resource, '.dateTime.where.where(code=value).value', 'dateTime' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'date .dateTime.where.where(code=array).array dateTime'; END $$;
+SELECT fhirpath_as_date(:resource, '.dateTime.where.where(code=array).array', 'dateTime' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'date .dateTime.where.where(code=where).where.where(code=value).value dateTime'; END $$;
+SELECT fhirpath_as_date(:resource, '.dateTime.where.where(code=where).where.where(code=value).value', 'dateTime' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'date .dateTime.where.where(code=where).where.where(code=array).array dateTime'; END $$;
+SELECT fhirpath_as_date(:resource, '.dateTime.where.where(code=where).where.where(code=array).array', 'dateTime' , 'max');
+select '''{
+  "instant":{
+    "value": "2002-05-20T09:00:00",
+    "array": ["2002-02-10T09:00:00", "2002-05-20T09:00:00", "2002-01-30T09:00:00"],
+    "where": [{ "code": "value", "value": "2002-05-20T09:00:00" },
+              { "code": "array", "array": ["2002-02-10T09:00:00", "2002-05-20T09:00:00", "2002-01-30T09:00:00"] },
+              { "code": "where",
+                "where": [ {"code": "value", "value": "2002-05-20T09:00:00"},
+                           {"code": "array", "array": ["2002-02-10T09:00:00", "2002-05-20T09:00:00", "2002-01-30T09:00:00"]} ] } ] },
+  "noise": "Some value"
+}''' resource \gset
+DO language plpgsql $$ BEGIN RAISE info 'date .instant.value instant'; END $$;
+SELECT fhirpath_as_date(:resource, '.instant.value', 'instant' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'date .instant.array instant'; END $$;
+SELECT fhirpath_as_date(:resource, '.instant.array', 'instant' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'date .instant.where.where(code=value).value instant'; END $$;
+SELECT fhirpath_as_date(:resource, '.instant.where.where(code=value).value', 'instant' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'date .instant.where.where(code=array).array instant'; END $$;
+SELECT fhirpath_as_date(:resource, '.instant.where.where(code=array).array', 'instant' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'date .instant.where.where(code=where).where.where(code=value).value instant'; END $$;
+SELECT fhirpath_as_date(:resource, '.instant.where.where(code=where).where.where(code=value).value', 'instant' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'date .instant.where.where(code=where).where.where(code=array).array instant'; END $$;
+SELECT fhirpath_as_date(:resource, '.instant.where.where(code=where).where.where(code=array).array', 'instant' , 'max');
+select '''{
+  "time":{
+    "value": "11:00:00",
+    "array": ["09:00:00", "11:00:00", "08:00:00"],
+    "where": [{ "code": "value", "value": "11:00:00" },
+              { "code": "array", "array": ["09:00:00", "11:00:00", "08:00:00"] },
+              { "code": "where",
+                "where": [ {"code": "value", "value": "11:00:00"},
+                           {"code": "array", "array": ["09:00:00", "11:00:00", "08:00:00"]} ] } ] },
+  "noise": "Some value"
+}''' resource \gset
+DO language plpgsql $$ BEGIN RAISE info 'date .time.value time'; END $$;
+SELECT fhirpath_as_date(:resource, '.time.value', 'time' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'date .time.array time'; END $$;
+SELECT fhirpath_as_date(:resource, '.time.array', 'time' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'date .time.where.where(code=value).value time'; END $$;
+SELECT fhirpath_as_date(:resource, '.time.where.where(code=value).value', 'time' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'date .time.where.where(code=array).array time'; END $$;
+SELECT fhirpath_as_date(:resource, '.time.where.where(code=array).array', 'time' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'date .time.where.where(code=where).where.where(code=value).value time'; END $$;
+SELECT fhirpath_as_date(:resource, '.time.where.where(code=where).where.where(code=value).value', 'time' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'date .time.where.where(code=where).where.where(code=array).array time'; END $$;
+SELECT fhirpath_as_date(:resource, '.time.where.where(code=where).where.where(code=array).array', 'time' , 'max');
+select '''{
+  "Period":{
+    "value": {"start": "1991-01-01", "end": "1991-12-31"},
+    "array": [{"start": "1991-01-01", "end": "1991-12-31"},
+							 {"start": "1990-01-01", "end": "1991-12-31"},
+							 {"start": "1981-01-01"}],
+    "where": [{ "code": "value", "value": {"start": "1991-01-01", "end": "1991-12-31"} },
+              { "code": "array", "array": [{"start": "1991-01-01", "end": "1991-12-31"},
+							 {"start": "1990-01-01", "end": "1991-12-31"},
+							 {"start": "1981-01-01"}] },
+              { "code": "where",
+                "where": [ {"code": "value", "value": {"start": "1991-01-01", "end": "1991-12-31"}},
+                           {"code": "array", "array": [{"start": "1991-01-01", "end": "1991-12-31"},
+							 {"start": "1990-01-01", "end": "1991-12-31"},
+							 {"start": "1981-01-01"}]} ] } ] },
+  "noise": "Some value"
+}''' resource \gset
+DO language plpgsql $$ BEGIN RAISE info 'date .Period.value Period'; END $$;
+SELECT fhirpath_as_date(:resource, '.Period.value', 'Period' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'date .Period.array Period'; END $$;
+SELECT fhirpath_as_date(:resource, '.Period.array', 'Period' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'date .Period.where.where(code=value).value Period'; END $$;
+SELECT fhirpath_as_date(:resource, '.Period.where.where(code=value).value', 'Period' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'date .Period.where.where(code=array).array Period'; END $$;
+SELECT fhirpath_as_date(:resource, '.Period.where.where(code=array).array', 'Period' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'date .Period.where.where(code=where).where.where(code=value).value Period'; END $$;
+SELECT fhirpath_as_date(:resource, '.Period.where.where(code=where).where.where(code=value).value', 'Period' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'date .Period.where.where(code=where).where.where(code=array).array Period'; END $$;
+SELECT fhirpath_as_date(:resource, '.Period.where.where(code=where).where.where(code=array).array', 'Period' , 'max');
+select '''{
+  "Timing":{
+    "value": {"event": ["1991-01-01", "1992-01-01"]},
+    "array": [{"event": ["1991-01-01"]},
+							 {"event": ["2000-01-01", "1990-01-01"]},
+							 {"event": ["1992-01-01"]}],
+    "where": [{ "code": "value", "value": {"event": ["1991-01-01", "1992-01-01"]} },
+              { "code": "array", "array": [{"event": ["1991-01-01"]},
+							 {"event": ["2000-01-01", "1990-01-01"]},
+							 {"event": ["1992-01-01"]}] },
+              { "code": "where",
+                "where": [ {"code": "value", "value": {"event": ["1991-01-01", "1992-01-01"]}},
+                           {"code": "array", "array": [{"event": ["1991-01-01"]},
+							 {"event": ["2000-01-01", "1990-01-01"]},
+							 {"event": ["1992-01-01"]}]} ] } ] },
+  "noise": "Some value"
+}''' resource \gset
+DO language plpgsql $$ BEGIN RAISE info 'date .Timing.value Timing'; END $$;
+SELECT fhirpath_as_date(:resource, '.Timing.value', 'Timing' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'date .Timing.array Timing'; END $$;
+SELECT fhirpath_as_date(:resource, '.Timing.array', 'Timing' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'date .Timing.where.where(code=value).value Timing'; END $$;
+SELECT fhirpath_as_date(:resource, '.Timing.where.where(code=value).value', 'Timing' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'date .Timing.where.where(code=array).array Timing'; END $$;
+SELECT fhirpath_as_date(:resource, '.Timing.where.where(code=array).array', 'Timing' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'date .Timing.where.where(code=where).where.where(code=value).value Timing'; END $$;
+SELECT fhirpath_as_date(:resource, '.Timing.where.where(code=where).where.where(code=value).value', 'Timing' , 'max');
+DO language plpgsql $$ BEGIN RAISE info 'date .Timing.where.where(code=where).where.where(code=array).array Timing'; END $$;
+SELECT fhirpath_as_date(:resource, '.Timing.where.where(code=where).where.where(code=array).array', 'Timing' , 'max');
+select '''{
+  "string":{
+    "value": "some STring",
+    "array": ["some STring", "some another string", "too string ouuu ehh"],
+    "where": [{ "code": "value", "value": "some STring" },
+              { "code": "array", "array": ["some STring", "some another string", "too string ouuu ehh"] },
+              { "code": "where",
+                "where": [ {"code": "value", "value": "some STring"},
+                           {"code": "array", "array": ["some STring", "some another string", "too string ouuu ehh"]} ] } ] },
+  "noise": "Some value"
+}''' resource \gset
+DO language plpgsql $$ BEGIN RAISE info 'string .string.value string'; END $$;
+SELECT fhirpath_as_string(:resource, '.string.value', 'string' );
+DO language plpgsql $$ BEGIN RAISE info 'string .string.array string'; END $$;
+SELECT fhirpath_as_string(:resource, '.string.array', 'string' );
+DO language plpgsql $$ BEGIN RAISE info 'string .string.where.where(code=value).value string'; END $$;
+SELECT fhirpath_as_string(:resource, '.string.where.where(code=value).value', 'string' );
+DO language plpgsql $$ BEGIN RAISE info 'string .string.where.where(code=array).array string'; END $$;
+SELECT fhirpath_as_string(:resource, '.string.where.where(code=array).array', 'string' );
+DO language plpgsql $$ BEGIN RAISE info 'string .string.where.where(code=where).where.where(code=value).value string'; END $$;
+SELECT fhirpath_as_string(:resource, '.string.where.where(code=where).where.where(code=value).value', 'string' );
+DO language plpgsql $$ BEGIN RAISE info 'string .string.where.where(code=where).where.where(code=array).array string'; END $$;
+SELECT fhirpath_as_string(:resource, '.string.where.where(code=where).where.where(code=array).array', 'string' );
+select '''{
+  "code":{
+    "value": "Some code",
+    "array": ["some code", "some another code"],
+    "where": [{ "code": "value", "value": "Some code" },
+              { "code": "array", "array": ["some code", "some another code"] },
+              { "code": "where",
+                "where": [ {"code": "value", "value": "Some code"},
+                           {"code": "array", "array": ["some code", "some another code"]} ] } ] },
+  "noise": "Some value"
+}''' resource \gset
+DO language plpgsql $$ BEGIN RAISE info 'string .code.value code'; END $$;
+SELECT fhirpath_as_string(:resource, '.code.value', 'code' );
+DO language plpgsql $$ BEGIN RAISE info 'string .code.array code'; END $$;
+SELECT fhirpath_as_string(:resource, '.code.array', 'code' );
+DO language plpgsql $$ BEGIN RAISE info 'string .code.where.where(code=value).value code'; END $$;
+SELECT fhirpath_as_string(:resource, '.code.where.where(code=value).value', 'code' );
+DO language plpgsql $$ BEGIN RAISE info 'string .code.where.where(code=array).array code'; END $$;
+SELECT fhirpath_as_string(:resource, '.code.where.where(code=array).array', 'code' );
+DO language plpgsql $$ BEGIN RAISE info 'string .code.where.where(code=where).where.where(code=value).value code'; END $$;
+SELECT fhirpath_as_string(:resource, '.code.where.where(code=where).where.where(code=value).value', 'code' );
+DO language plpgsql $$ BEGIN RAISE info 'string .code.where.where(code=where).where.where(code=array).array code'; END $$;
+SELECT fhirpath_as_string(:resource, '.code.where.where(code=where).where.where(code=array).array', 'code' );
+select '''{
+  "id":{
+    "value": "db042450-efa6-11e6-bc64-92361f002671",
+    "array": ["e0349ebe-efa6-11e6-bc64-92361f002671",
+					 "e034a24c-efa6-11e6-bc64-92361f002671",
+				   "e034a364-efa6-11e6-bc64-92361f002671"],
+    "where": [{ "code": "value", "value": "db042450-efa6-11e6-bc64-92361f002671" },
+              { "code": "array", "array": ["e0349ebe-efa6-11e6-bc64-92361f002671",
+					 "e034a24c-efa6-11e6-bc64-92361f002671",
+				   "e034a364-efa6-11e6-bc64-92361f002671"] },
+              { "code": "where",
+                "where": [ {"code": "value", "value": "db042450-efa6-11e6-bc64-92361f002671"},
+                           {"code": "array", "array": ["e0349ebe-efa6-11e6-bc64-92361f002671",
+					 "e034a24c-efa6-11e6-bc64-92361f002671",
+				   "e034a364-efa6-11e6-bc64-92361f002671"]} ] } ] },
+  "noise": "Some value"
+}''' resource \gset
+DO language plpgsql $$ BEGIN RAISE info 'string .id.value id'; END $$;
+SELECT fhirpath_as_string(:resource, '.id.value', 'id' );
+DO language plpgsql $$ BEGIN RAISE info 'string .id.array id'; END $$;
+SELECT fhirpath_as_string(:resource, '.id.array', 'id' );
+DO language plpgsql $$ BEGIN RAISE info 'string .id.where.where(code=value).value id'; END $$;
+SELECT fhirpath_as_string(:resource, '.id.where.where(code=value).value', 'id' );
+DO language plpgsql $$ BEGIN RAISE info 'string .id.where.where(code=array).array id'; END $$;
+SELECT fhirpath_as_string(:resource, '.id.where.where(code=array).array', 'id' );
+DO language plpgsql $$ BEGIN RAISE info 'string .id.where.where(code=where).where.where(code=value).value id'; END $$;
+SELECT fhirpath_as_string(:resource, '.id.where.where(code=where).where.where(code=value).value', 'id' );
+DO language plpgsql $$ BEGIN RAISE info 'string .id.where.where(code=where).where.where(code=array).array id'; END $$;
+SELECT fhirpath_as_string(:resource, '.id.where.where(code=where).where.where(code=array).array', 'id' );
+select '''{
+  "markdown":{
+    "value": "\n ## Hello header\n \n __some bold__ or _italic_\n \n ",
+    "array": ["\n # Hello header 1\n \n __some bold__ or _italic_\n \n ",
+								 "\n \n ## Hello header 2\n \n __some bold__ or _italic_\n \n \n ",
+								 "\n \n ### Hello header 3\n \n __some bold__ or _italic_\n \n "],
+    "where": [{ "code": "value", "value": "\n ## Hello header\n \n __some bold__ or _italic_\n \n " },
+              { "code": "array", "array": ["\n # Hello header 1\n \n __some bold__ or _italic_\n \n ",
+								 "\n \n ## Hello header 2\n \n __some bold__ or _italic_\n \n \n ",
+								 "\n \n ### Hello header 3\n \n __some bold__ or _italic_\n \n "] },
+              { "code": "where",
+                "where": [ {"code": "value", "value": "\n ## Hello header\n \n __some bold__ or _italic_\n \n "},
+                           {"code": "array", "array": ["\n # Hello header 1\n \n __some bold__ or _italic_\n \n ",
+								 "\n \n ## Hello header 2\n \n __some bold__ or _italic_\n \n \n ",
+								 "\n \n ### Hello header 3\n \n __some bold__ or _italic_\n \n "]} ] } ] },
+  "noise": "Some value"
+}''' resource \gset
+DO language plpgsql $$ BEGIN RAISE info 'string .markdown.value markdown'; END $$;
+SELECT fhirpath_as_string(:resource, '.markdown.value', 'markdown' );
+DO language plpgsql $$ BEGIN RAISE info 'string .markdown.array markdown'; END $$;
+SELECT fhirpath_as_string(:resource, '.markdown.array', 'markdown' );
+DO language plpgsql $$ BEGIN RAISE info 'string .markdown.where.where(code=value).value markdown'; END $$;
+SELECT fhirpath_as_string(:resource, '.markdown.where.where(code=value).value', 'markdown' );
+DO language plpgsql $$ BEGIN RAISE info 'string .markdown.where.where(code=array).array markdown'; END $$;
+SELECT fhirpath_as_string(:resource, '.markdown.where.where(code=array).array', 'markdown' );
+DO language plpgsql $$ BEGIN RAISE info 'string .markdown.where.where(code=where).where.where(code=value).value markdown'; END $$;
+SELECT fhirpath_as_string(:resource, '.markdown.where.where(code=where).where.where(code=value).value', 'markdown' );
+DO language plpgsql $$ BEGIN RAISE info 'string .markdown.where.where(code=where).where.where(code=array).array markdown'; END $$;
+SELECT fhirpath_as_string(:resource, '.markdown.where.where(code=where).where.where(code=array).array', 'markdown' );
+select '''{
+  "HumanName":{
+    "value": {"use": "official",
+									"text": "NameText",
+									"period":  {"start": "1991-01-01", "end": "1991-12-31"},
+									"family": ["family 1", "family 2"],
+									"given": ["given 1", "given 2"],
+									"prefix": ["prefix 1", "prefix 2"],
+									"suffix": ["suffix 1", "suffix 2"]},
+    "array": [{"use": "official",
+									"text": "NameText",
+									"period":  {"start": "1991-01-01", "end": "1991-12-31"},
+									"family": ["family 1", "family 2"],
+									"given": ["given 1", "given 2"],
+									"prefix": ["prefix 1", "prefix 2"],
+									"suffix": ["suffix 1", "suffix 2"]}, {"use": "official",
+									"text": "NameText",
+									"period":  {"start": "1991-01-01", "end": "1991-12-31"},
+									"family": ["family 1", "family 2"],
+									"given": ["given 1", "given 2"],
+									"prefix": ["prefix 1", "prefix 2"],
+									"suffix": ["suffix 1", "suffix 2"]}, {"use": "official",
+									"text": "NameText",
+									"period":  {"start": "1991-01-01", "end": "1991-12-31"},
+									"family": ["family 1", "family 2"],
+									"given": ["given 1", "given 2"],
+									"prefix": ["prefix 1", "prefix 2"],
+									"suffix": ["suffix 1", "suffix 2"]}],
+    "where": [{ "code": "value", "value": {"use": "official",
+									"text": "NameText",
+									"period":  {"start": "1991-01-01", "end": "1991-12-31"},
+									"family": ["family 1", "family 2"],
+									"given": ["given 1", "given 2"],
+									"prefix": ["prefix 1", "prefix 2"],
+									"suffix": ["suffix 1", "suffix 2"]} },
+              { "code": "array", "array": [{"use": "official",
+									"text": "NameText",
+									"period":  {"start": "1991-01-01", "end": "1991-12-31"},
+									"family": ["family 1", "family 2"],
+									"given": ["given 1", "given 2"],
+									"prefix": ["prefix 1", "prefix 2"],
+									"suffix": ["suffix 1", "suffix 2"]}, {"use": "official",
+									"text": "NameText",
+									"period":  {"start": "1991-01-01", "end": "1991-12-31"},
+									"family": ["family 1", "family 2"],
+									"given": ["given 1", "given 2"],
+									"prefix": ["prefix 1", "prefix 2"],
+									"suffix": ["suffix 1", "suffix 2"]}, {"use": "official",
+									"text": "NameText",
+									"period":  {"start": "1991-01-01", "end": "1991-12-31"},
+									"family": ["family 1", "family 2"],
+									"given": ["given 1", "given 2"],
+									"prefix": ["prefix 1", "prefix 2"],
+									"suffix": ["suffix 1", "suffix 2"]}] },
+              { "code": "where",
+                "where": [ {"code": "value", "value": {"use": "official",
+									"text": "NameText",
+									"period":  {"start": "1991-01-01", "end": "1991-12-31"},
+									"family": ["family 1", "family 2"],
+									"given": ["given 1", "given 2"],
+									"prefix": ["prefix 1", "prefix 2"],
+									"suffix": ["suffix 1", "suffix 2"]}},
+                           {"code": "array", "array": [{"use": "official",
+									"text": "NameText",
+									"period":  {"start": "1991-01-01", "end": "1991-12-31"},
+									"family": ["family 1", "family 2"],
+									"given": ["given 1", "given 2"],
+									"prefix": ["prefix 1", "prefix 2"],
+									"suffix": ["suffix 1", "suffix 2"]}, {"use": "official",
+									"text": "NameText",
+									"period":  {"start": "1991-01-01", "end": "1991-12-31"},
+									"family": ["family 1", "family 2"],
+									"given": ["given 1", "given 2"],
+									"prefix": ["prefix 1", "prefix 2"],
+									"suffix": ["suffix 1", "suffix 2"]}, {"use": "official",
+									"text": "NameText",
+									"period":  {"start": "1991-01-01", "end": "1991-12-31"},
+									"family": ["family 1", "family 2"],
+									"given": ["given 1", "given 2"],
+									"prefix": ["prefix 1", "prefix 2"],
+									"suffix": ["suffix 1", "suffix 2"]}]} ] } ] },
+  "noise": "Some value"
+}''' resource \gset
+DO language plpgsql $$ BEGIN RAISE info 'string .HumanName.value HumanName'; END $$;
+SELECT fhirpath_as_string(:resource, '.HumanName.value', 'HumanName' );
+DO language plpgsql $$ BEGIN RAISE info 'string .HumanName.array HumanName'; END $$;
+SELECT fhirpath_as_string(:resource, '.HumanName.array', 'HumanName' );
+DO language plpgsql $$ BEGIN RAISE info 'string .HumanName.where.where(code=value).value HumanName'; END $$;
+SELECT fhirpath_as_string(:resource, '.HumanName.where.where(code=value).value', 'HumanName' );
+DO language plpgsql $$ BEGIN RAISE info 'string .HumanName.where.where(code=array).array HumanName'; END $$;
+SELECT fhirpath_as_string(:resource, '.HumanName.where.where(code=array).array', 'HumanName' );
+DO language plpgsql $$ BEGIN RAISE info 'string .HumanName.where.where(code=where).where.where(code=value).value HumanName'; END $$;
+SELECT fhirpath_as_string(:resource, '.HumanName.where.where(code=where).where.where(code=value).value', 'HumanName' );
+DO language plpgsql $$ BEGIN RAISE info 'string .HumanName.where.where(code=where).where.where(code=array).array HumanName'; END $$;
+SELECT fhirpath_as_string(:resource, '.HumanName.where.where(code=where).where.where(code=array).array', 'HumanName' );
+select '''{
+  "Address":{
+    "value": {"use": "home", "type":"physical",
+								"text": "Some address text", "line": ["line 1", "line 2"],
+								"city": "SPB", "District": "DistrictFive",
+								"state": "state", "postalCode": "Postal code",
+								"period":  {"start": "1991-01-01", "end": "1991-12-31"},
+								"country": "Russia" },
+    "array": [{"use": "home", "type":"physical",
+								"text": "Some address text", "line": ["line 1", "line 2"],
+								"city": "SPB", "District": "DistrictFive",
+								"state": "state", "postalCode": "Postal code",
+								"period":  {"start": "1991-01-01", "end": "1991-12-31"},
+								"country": "Russia" }, {"use": "home", "type":"physical",
+								"text": "Some address text", "line": ["line 1", "line 2"],
+								"city": "SPB", "District": "DistrictFive",
+								"state": "state", "postalCode": "Postal code",
+								"period":  {"start": "1991-01-01", "end": "1991-12-31"},
+								"country": "Russia" }, {"use": "home", "type":"physical",
+								"text": "Some address text", "line": ["line 1", "line 2"],
+								"city": "SPB", "District": "DistrictFive",
+								"state": "state", "postalCode": "Postal code",
+								"period":  {"start": "1991-01-01", "end": "1991-12-31"},
+								"country": "Russia" }],
+    "where": [{ "code": "value", "value": {"use": "home", "type":"physical",
+								"text": "Some address text", "line": ["line 1", "line 2"],
+								"city": "SPB", "District": "DistrictFive",
+								"state": "state", "postalCode": "Postal code",
+								"period":  {"start": "1991-01-01", "end": "1991-12-31"},
+								"country": "Russia" } },
+              { "code": "array", "array": [{"use": "home", "type":"physical",
+								"text": "Some address text", "line": ["line 1", "line 2"],
+								"city": "SPB", "District": "DistrictFive",
+								"state": "state", "postalCode": "Postal code",
+								"period":  {"start": "1991-01-01", "end": "1991-12-31"},
+								"country": "Russia" }, {"use": "home", "type":"physical",
+								"text": "Some address text", "line": ["line 1", "line 2"],
+								"city": "SPB", "District": "DistrictFive",
+								"state": "state", "postalCode": "Postal code",
+								"period":  {"start": "1991-01-01", "end": "1991-12-31"},
+								"country": "Russia" }, {"use": "home", "type":"physical",
+								"text": "Some address text", "line": ["line 1", "line 2"],
+								"city": "SPB", "District": "DistrictFive",
+								"state": "state", "postalCode": "Postal code",
+								"period":  {"start": "1991-01-01", "end": "1991-12-31"},
+								"country": "Russia" }] },
+              { "code": "where",
+                "where": [ {"code": "value", "value": {"use": "home", "type":"physical",
+								"text": "Some address text", "line": ["line 1", "line 2"],
+								"city": "SPB", "District": "DistrictFive",
+								"state": "state", "postalCode": "Postal code",
+								"period":  {"start": "1991-01-01", "end": "1991-12-31"},
+								"country": "Russia" }},
+                           {"code": "array", "array": [{"use": "home", "type":"physical",
+								"text": "Some address text", "line": ["line 1", "line 2"],
+								"city": "SPB", "District": "DistrictFive",
+								"state": "state", "postalCode": "Postal code",
+								"period":  {"start": "1991-01-01", "end": "1991-12-31"},
+								"country": "Russia" }, {"use": "home", "type":"physical",
+								"text": "Some address text", "line": ["line 1", "line 2"],
+								"city": "SPB", "District": "DistrictFive",
+								"state": "state", "postalCode": "Postal code",
+								"period":  {"start": "1991-01-01", "end": "1991-12-31"},
+								"country": "Russia" }, {"use": "home", "type":"physical",
+								"text": "Some address text", "line": ["line 1", "line 2"],
+								"city": "SPB", "District": "DistrictFive",
+								"state": "state", "postalCode": "Postal code",
+								"period":  {"start": "1991-01-01", "end": "1991-12-31"},
+								"country": "Russia" }]} ] } ] },
+  "noise": "Some value"
+}''' resource \gset
+DO language plpgsql $$ BEGIN RAISE info 'string .Address.value Address'; END $$;
+SELECT fhirpath_as_string(:resource, '.Address.value', 'Address' );
+DO language plpgsql $$ BEGIN RAISE info 'string .Address.array Address'; END $$;
+SELECT fhirpath_as_string(:resource, '.Address.array', 'Address' );
+DO language plpgsql $$ BEGIN RAISE info 'string .Address.where.where(code=value).value Address'; END $$;
+SELECT fhirpath_as_string(:resource, '.Address.where.where(code=value).value', 'Address' );
+DO language plpgsql $$ BEGIN RAISE info 'string .Address.where.where(code=array).array Address'; END $$;
+SELECT fhirpath_as_string(:resource, '.Address.where.where(code=array).array', 'Address' );
+DO language plpgsql $$ BEGIN RAISE info 'string .Address.where.where(code=where).where.where(code=value).value Address'; END $$;
+SELECT fhirpath_as_string(:resource, '.Address.where.where(code=where).where.where(code=value).value', 'Address' );
+DO language plpgsql $$ BEGIN RAISE info 'string .Address.where.where(code=where).where.where(code=array).array Address'; END $$;
+SELECT fhirpath_as_string(:resource, '.Address.where.where(code=where).where.where(code=array).array', 'Address' );
+select '''{
+  "boolean":{
+    "value": "true",
+    "array": ["true", "false", "true"],
+    "where": [{ "code": "value", "value": "true" },
+              { "code": "array", "array": ["true", "false", "true"] },
+              { "code": "where",
+                "where": [ {"code": "value", "value": "true"},
+                           {"code": "array", "array": ["true", "false", "true"]} ] } ] },
+  "noise": "Some value"
+}''' resource \gset
+DO language plpgsql $$ BEGIN RAISE info 'token .boolean.value boolean'; END $$;
+SELECT fhirpath_as_token(:resource, '.boolean.value', 'boolean' );
+DO language plpgsql $$ BEGIN RAISE info 'token .boolean.array boolean'; END $$;
+SELECT fhirpath_as_token(:resource, '.boolean.array', 'boolean' );
+DO language plpgsql $$ BEGIN RAISE info 'token .boolean.where.where(code=value).value boolean'; END $$;
+SELECT fhirpath_as_token(:resource, '.boolean.where.where(code=value).value', 'boolean' );
+DO language plpgsql $$ BEGIN RAISE info 'token .boolean.where.where(code=array).array boolean'; END $$;
+SELECT fhirpath_as_token(:resource, '.boolean.where.where(code=array).array', 'boolean' );
+DO language plpgsql $$ BEGIN RAISE info 'token .boolean.where.where(code=where).where.where(code=value).value boolean'; END $$;
+SELECT fhirpath_as_token(:resource, '.boolean.where.where(code=where).where.where(code=value).value', 'boolean' );
+DO language plpgsql $$ BEGIN RAISE info 'token .boolean.where.where(code=where).where.where(code=array).array boolean'; END $$;
+SELECT fhirpath_as_token(:resource, '.boolean.where.where(code=where).where.where(code=array).array', 'boolean' );
+select '''{
+  "code":{
+    "value": "Some code",
+    "array": ["some code", "some another code"],
+    "where": [{ "code": "value", "value": "Some code" },
+              { "code": "array", "array": ["some code", "some another code"] },
+              { "code": "where",
+                "where": [ {"code": "value", "value": "Some code"},
+                           {"code": "array", "array": ["some code", "some another code"]} ] } ] },
+  "noise": "Some value"
+}''' resource \gset
+DO language plpgsql $$ BEGIN RAISE info 'token .code.value code'; END $$;
+SELECT fhirpath_as_token(:resource, '.code.value', 'code' );
+DO language plpgsql $$ BEGIN RAISE info 'token .code.array code'; END $$;
+SELECT fhirpath_as_token(:resource, '.code.array', 'code' );
+DO language plpgsql $$ BEGIN RAISE info 'token .code.where.where(code=value).value code'; END $$;
+SELECT fhirpath_as_token(:resource, '.code.where.where(code=value).value', 'code' );
+DO language plpgsql $$ BEGIN RAISE info 'token .code.where.where(code=array).array code'; END $$;
+SELECT fhirpath_as_token(:resource, '.code.where.where(code=array).array', 'code' );
+DO language plpgsql $$ BEGIN RAISE info 'token .code.where.where(code=where).where.where(code=value).value code'; END $$;
+SELECT fhirpath_as_token(:resource, '.code.where.where(code=where).where.where(code=value).value', 'code' );
+DO language plpgsql $$ BEGIN RAISE info 'token .code.where.where(code=where).where.where(code=array).array code'; END $$;
+SELECT fhirpath_as_token(:resource, '.code.where.where(code=where).where.where(code=array).array', 'code' );
+select '''{
+  "string":{
+    "value": "some STring",
+    "array": ["some STring", "some another string", "too string ouuu ehh"],
+    "where": [{ "code": "value", "value": "some STring" },
+              { "code": "array", "array": ["some STring", "some another string", "too string ouuu ehh"] },
+              { "code": "where",
+                "where": [ {"code": "value", "value": "some STring"},
+                           {"code": "array", "array": ["some STring", "some another string", "too string ouuu ehh"]} ] } ] },
+  "noise": "Some value"
+}''' resource \gset
+DO language plpgsql $$ BEGIN RAISE info 'token .string.value string'; END $$;
+SELECT fhirpath_as_token(:resource, '.string.value', 'string' );
+DO language plpgsql $$ BEGIN RAISE info 'token .string.array string'; END $$;
+SELECT fhirpath_as_token(:resource, '.string.array', 'string' );
+DO language plpgsql $$ BEGIN RAISE info 'token .string.where.where(code=value).value string'; END $$;
+SELECT fhirpath_as_token(:resource, '.string.where.where(code=value).value', 'string' );
+DO language plpgsql $$ BEGIN RAISE info 'token .string.where.where(code=array).array string'; END $$;
+SELECT fhirpath_as_token(:resource, '.string.where.where(code=array).array', 'string' );
+DO language plpgsql $$ BEGIN RAISE info 'token .string.where.where(code=where).where.where(code=value).value string'; END $$;
+SELECT fhirpath_as_token(:resource, '.string.where.where(code=where).where.where(code=value).value', 'string' );
+DO language plpgsql $$ BEGIN RAISE info 'token .string.where.where(code=where).where.where(code=array).array string'; END $$;
+SELECT fhirpath_as_token(:resource, '.string.where.where(code=where).where.where(code=array).array', 'string' );
+select '''{
+  "Identifier":{
+    "value": {
+	"use": "use",
+  "type": {"coding": [{"system": "type_coding_system", "code": "type_coding_code"}], "text": "type_text"},
+  "system": "system",
+  "value": "value",
+  "period": {"start": "1991-01-01", "end": "1991-12-31"}
+},
+    "array": [{
+	"use": "use",
+  "type": {"coding": [{"system": "type_coding_system", "code": "type_coding_code"}], "text": "type_text"},
+  "system": "system",
+  "value": "value",
+  "period": {"start": "1991-01-01", "end": "1991-12-31"}
+}, {
+	"use": "use",
+  "type": {"coding": [{"system": "type_coding_system", "code": "type_coding_code"}], "text": "type_text"},
+  "system": "system",
+  "value": "value",
+  "period": {"start": "1991-01-01", "end": "1991-12-31"}
+}],
+    "where": [{ "code": "value", "value": {
+	"use": "use",
+  "type": {"coding": [{"system": "type_coding_system", "code": "type_coding_code"}], "text": "type_text"},
+  "system": "system",
+  "value": "value",
+  "period": {"start": "1991-01-01", "end": "1991-12-31"}
+} },
+              { "code": "array", "array": [{
+	"use": "use",
+  "type": {"coding": [{"system": "type_coding_system", "code": "type_coding_code"}], "text": "type_text"},
+  "system": "system",
+  "value": "value",
+  "period": {"start": "1991-01-01", "end": "1991-12-31"}
+}, {
+	"use": "use",
+  "type": {"coding": [{"system": "type_coding_system", "code": "type_coding_code"}], "text": "type_text"},
+  "system": "system",
+  "value": "value",
+  "period": {"start": "1991-01-01", "end": "1991-12-31"}
+}] },
+              { "code": "where",
+                "where": [ {"code": "value", "value": {
+	"use": "use",
+  "type": {"coding": [{"system": "type_coding_system", "code": "type_coding_code"}], "text": "type_text"},
+  "system": "system",
+  "value": "value",
+  "period": {"start": "1991-01-01", "end": "1991-12-31"}
+}},
+                           {"code": "array", "array": [{
+	"use": "use",
+  "type": {"coding": [{"system": "type_coding_system", "code": "type_coding_code"}], "text": "type_text"},
+  "system": "system",
+  "value": "value",
+  "period": {"start": "1991-01-01", "end": "1991-12-31"}
+}, {
+	"use": "use",
+  "type": {"coding": [{"system": "type_coding_system", "code": "type_coding_code"}], "text": "type_text"},
+  "system": "system",
+  "value": "value",
+  "period": {"start": "1991-01-01", "end": "1991-12-31"}
+}]} ] } ] },
+  "noise": "Some value"
+}''' resource \gset
+DO language plpgsql $$ BEGIN RAISE info 'token .Identifier.value Identifier'; END $$;
+SELECT fhirpath_as_token(:resource, '.Identifier.value', 'Identifier' );
+DO language plpgsql $$ BEGIN RAISE info 'token .Identifier.array Identifier'; END $$;
+SELECT fhirpath_as_token(:resource, '.Identifier.array', 'Identifier' );
+DO language plpgsql $$ BEGIN RAISE info 'token .Identifier.where.where(code=value).value Identifier'; END $$;
+SELECT fhirpath_as_token(:resource, '.Identifier.where.where(code=value).value', 'Identifier' );
+DO language plpgsql $$ BEGIN RAISE info 'token .Identifier.where.where(code=array).array Identifier'; END $$;
+SELECT fhirpath_as_token(:resource, '.Identifier.where.where(code=array).array', 'Identifier' );
+DO language plpgsql $$ BEGIN RAISE info 'token .Identifier.where.where(code=where).where.where(code=value).value Identifier'; END $$;
+SELECT fhirpath_as_token(:resource, '.Identifier.where.where(code=where).where.where(code=value).value', 'Identifier' );
+DO language plpgsql $$ BEGIN RAISE info 'token .Identifier.where.where(code=where).where.where(code=array).array Identifier'; END $$;
+SELECT fhirpath_as_token(:resource, '.Identifier.where.where(code=where).where.where(code=array).array', 'Identifier' );
+select '''{
+  "Coding":{
+    "value": {"system": "type_coding_system", "code": "type_coding_code"},
+    "array": [{"system": "system_1", "code": "code_1"}, {"system": "system_2", "code": "code_2"}],
+    "where": [{ "code": "value", "value": {"system": "type_coding_system", "code": "type_coding_code"} },
+              { "code": "array", "array": [{"system": "system_1", "code": "code_1"}, {"system": "system_2", "code": "code_2"}] },
+              { "code": "where",
+                "where": [ {"code": "value", "value": {"system": "type_coding_system", "code": "type_coding_code"}},
+                           {"code": "array", "array": [{"system": "system_1", "code": "code_1"}, {"system": "system_2", "code": "code_2"}]} ] } ] },
+  "noise": "Some value"
+}''' resource \gset
+DO language plpgsql $$ BEGIN RAISE info 'token .Coding.value Coding'; END $$;
+SELECT fhirpath_as_token(:resource, '.Coding.value', 'Coding' );
+DO language plpgsql $$ BEGIN RAISE info 'token .Coding.array Coding'; END $$;
+SELECT fhirpath_as_token(:resource, '.Coding.array', 'Coding' );
+DO language plpgsql $$ BEGIN RAISE info 'token .Coding.where.where(code=value).value Coding'; END $$;
+SELECT fhirpath_as_token(:resource, '.Coding.where.where(code=value).value', 'Coding' );
+DO language plpgsql $$ BEGIN RAISE info 'token .Coding.where.where(code=array).array Coding'; END $$;
+SELECT fhirpath_as_token(:resource, '.Coding.where.where(code=array).array', 'Coding' );
+DO language plpgsql $$ BEGIN RAISE info 'token .Coding.where.where(code=where).where.where(code=value).value Coding'; END $$;
+SELECT fhirpath_as_token(:resource, '.Coding.where.where(code=where).where.where(code=value).value', 'Coding' );
+DO language plpgsql $$ BEGIN RAISE info 'token .Coding.where.where(code=where).where.where(code=array).array Coding'; END $$;
+SELECT fhirpath_as_token(:resource, '.Coding.where.where(code=where).where.where(code=array).array', 'Coding' );
+select '''{
+  "CodeableConcept":{
+    "value": {
+	"coding": [
+		{"system": "system_1", "code": "code_1"},
+		{"system": "system_2", "code": "code_2"}],
+	"text": "text" },
+    "array": [{
+	"coding": [
+		{"system": "system_1", "code": "code_1"},
+		{"system": "system_2", "code": "code_2"}],
+	"text": "text" }, {
+	"coding": [
+		{"system": "system_1", "code": "code_1"},
+		{"system": "system_2", "code": "code_2"}],
+	"text": "text" }],
+    "where": [{ "code": "value", "value": {
+	"coding": [
+		{"system": "system_1", "code": "code_1"},
+		{"system": "system_2", "code": "code_2"}],
+	"text": "text" } },
+              { "code": "array", "array": [{
+	"coding": [
+		{"system": "system_1", "code": "code_1"},
+		{"system": "system_2", "code": "code_2"}],
+	"text": "text" }, {
+	"coding": [
+		{"system": "system_1", "code": "code_1"},
+		{"system": "system_2", "code": "code_2"}],
+	"text": "text" }] },
+              { "code": "where",
+                "where": [ {"code": "value", "value": {
+	"coding": [
+		{"system": "system_1", "code": "code_1"},
+		{"system": "system_2", "code": "code_2"}],
+	"text": "text" }},
+                           {"code": "array", "array": [{
+	"coding": [
+		{"system": "system_1", "code": "code_1"},
+		{"system": "system_2", "code": "code_2"}],
+	"text": "text" }, {
+	"coding": [
+		{"system": "system_1", "code": "code_1"},
+		{"system": "system_2", "code": "code_2"}],
+	"text": "text" }]} ] } ] },
+  "noise": "Some value"
+}''' resource \gset
+DO language plpgsql $$ BEGIN RAISE info 'token .CodeableConcept.value CodeableConcept'; END $$;
+SELECT fhirpath_as_token(:resource, '.CodeableConcept.value', 'CodeableConcept' );
+DO language plpgsql $$ BEGIN RAISE info 'token .CodeableConcept.array CodeableConcept'; END $$;
+SELECT fhirpath_as_token(:resource, '.CodeableConcept.array', 'CodeableConcept' );
+DO language plpgsql $$ BEGIN RAISE info 'token .CodeableConcept.where.where(code=value).value CodeableConcept'; END $$;
+SELECT fhirpath_as_token(:resource, '.CodeableConcept.where.where(code=value).value', 'CodeableConcept' );
+DO language plpgsql $$ BEGIN RAISE info 'token .CodeableConcept.where.where(code=array).array CodeableConcept'; END $$;
+SELECT fhirpath_as_token(:resource, '.CodeableConcept.where.where(code=array).array', 'CodeableConcept' );
+DO language plpgsql $$ BEGIN RAISE info 'token .CodeableConcept.where.where(code=where).where.where(code=value).value CodeableConcept'; END $$;
+SELECT fhirpath_as_token(:resource, '.CodeableConcept.where.where(code=where).where.where(code=value).value', 'CodeableConcept' );
+DO language plpgsql $$ BEGIN RAISE info 'token .CodeableConcept.where.where(code=where).where.where(code=array).array CodeableConcept'; END $$;
+SELECT fhirpath_as_token(:resource, '.CodeableConcept.where.where(code=where).where.where(code=array).array', 'CodeableConcept' );
+select '''{
+  "ContactPoint":{
+    "value": { "system": "system", "value": "value", "use": "home", "rank": 1 },
+    "array": [{ "system": "system", "value": "value", "use": "home", "rank": 1 }, { "system": "system", "value": "value", "use": "home", "rank": 1 }],
+    "where": [{ "code": "value", "value": { "system": "system", "value": "value", "use": "home", "rank": 1 } },
+              { "code": "array", "array": [{ "system": "system", "value": "value", "use": "home", "rank": 1 }, { "system": "system", "value": "value", "use": "home", "rank": 1 }] },
+              { "code": "where",
+                "where": [ {"code": "value", "value": { "system": "system", "value": "value", "use": "home", "rank": 1 }},
+                           {"code": "array", "array": [{ "system": "system", "value": "value", "use": "home", "rank": 1 }, { "system": "system", "value": "value", "use": "home", "rank": 1 }]} ] } ] },
+  "noise": "Some value"
+}''' resource \gset
+DO language plpgsql $$ BEGIN RAISE info 'token .ContactPoint.value ContactPoint'; END $$;
+SELECT fhirpath_as_token(:resource, '.ContactPoint.value', 'ContactPoint' );
+DO language plpgsql $$ BEGIN RAISE info 'token .ContactPoint.array ContactPoint'; END $$;
+SELECT fhirpath_as_token(:resource, '.ContactPoint.array', 'ContactPoint' );
+DO language plpgsql $$ BEGIN RAISE info 'token .ContactPoint.where.where(code=value).value ContactPoint'; END $$;
+SELECT fhirpath_as_token(:resource, '.ContactPoint.where.where(code=value).value', 'ContactPoint' );
+DO language plpgsql $$ BEGIN RAISE info 'token .ContactPoint.where.where(code=array).array ContactPoint'; END $$;
+SELECT fhirpath_as_token(:resource, '.ContactPoint.where.where(code=array).array', 'ContactPoint' );
+DO language plpgsql $$ BEGIN RAISE info 'token .ContactPoint.where.where(code=where).where.where(code=value).value ContactPoint'; END $$;
+SELECT fhirpath_as_token(:resource, '.ContactPoint.where.where(code=where).where.where(code=value).value', 'ContactPoint' );
+DO language plpgsql $$ BEGIN RAISE info 'token .ContactPoint.where.where(code=where).where.where(code=array).array ContactPoint'; END $$;
+SELECT fhirpath_as_token(:resource, '.ContactPoint.where.where(code=where).where.where(code=array).array', 'ContactPoint' );
+select '''{
+  "uri":{
+    "value": "http://some.url",
+    "array": ["http://datypic.com", "mailto:info@datypic.com","../%C3%A9dition.html","http://datypic.com/prod.html#shirt","urn:example:org","../édition.html"],
+    "where": [{ "code": "value", "value": "http://some.url" },
+              { "code": "array", "array": ["http://datypic.com", "mailto:info@datypic.com","../%C3%A9dition.html","http://datypic.com/prod.html#shirt","urn:example:org","../édition.html"] },
+              { "code": "where",
+                "where": [ {"code": "value", "value": "http://some.url"},
+                           {"code": "array", "array": ["http://datypic.com", "mailto:info@datypic.com","../%C3%A9dition.html","http://datypic.com/prod.html#shirt","urn:example:org","../édition.html"]} ] } ] },
+  "noise": "Some value"
+}''' resource \gset
+DO language plpgsql $$ BEGIN RAISE info 'reference .uri.value uri'; END $$;
+SELECT fhirpath_as_reference(:resource, '.uri.value', 'uri' );
+DO language plpgsql $$ BEGIN RAISE info 'reference .uri.array uri'; END $$;
+SELECT fhirpath_as_reference(:resource, '.uri.array', 'uri' );
+DO language plpgsql $$ BEGIN RAISE info 'reference .uri.where.where(code=value).value uri'; END $$;
+SELECT fhirpath_as_reference(:resource, '.uri.where.where(code=value).value', 'uri' );
+DO language plpgsql $$ BEGIN RAISE info 'reference .uri.where.where(code=array).array uri'; END $$;
+SELECT fhirpath_as_reference(:resource, '.uri.where.where(code=array).array', 'uri' );
+DO language plpgsql $$ BEGIN RAISE info 'reference .uri.where.where(code=where).where.where(code=value).value uri'; END $$;
+SELECT fhirpath_as_reference(:resource, '.uri.where.where(code=where).where.where(code=value).value', 'uri' );
+DO language plpgsql $$ BEGIN RAISE info 'reference .uri.where.where(code=where).where.where(code=array).array uri'; END $$;
+SELECT fhirpath_as_reference(:resource, '.uri.where.where(code=where).where.where(code=array).array', 'uri' );
+select '''{
+  "Reference":{
+    "value": {"reference": "http://some.url", "display":"display"},
+    "array": [
+{"reference": "http://datypic.com", "display":"display"}, {"reference": "mailto:info@datypic.com", "display":"display"},
+{"reference": "../%C3%A9dition.html", "display": "display"},
+{"reference": "http://datypic.com/prod.html#shirt", "display": "display"},
+{"reference": "urn:example:org", "display": "display"}],
+    "where": [{ "code": "value", "value": {"reference": "http://some.url", "display":"display"} },
+              { "code": "array", "array": [
+{"reference": "http://datypic.com", "display":"display"}, {"reference": "mailto:info@datypic.com", "display":"display"},
+{"reference": "../%C3%A9dition.html", "display": "display"},
+{"reference": "http://datypic.com/prod.html#shirt", "display": "display"},
+{"reference": "urn:example:org", "display": "display"}] },
+              { "code": "where",
+                "where": [ {"code": "value", "value": {"reference": "http://some.url", "display":"display"}},
+                           {"code": "array", "array": [
+{"reference": "http://datypic.com", "display":"display"}, {"reference": "mailto:info@datypic.com", "display":"display"},
+{"reference": "../%C3%A9dition.html", "display": "display"},
+{"reference": "http://datypic.com/prod.html#shirt", "display": "display"},
+{"reference": "urn:example:org", "display": "display"}]} ] } ] },
+  "noise": "Some value"
+}''' resource \gset
+DO language plpgsql $$ BEGIN RAISE info 'reference .Reference.value Reference'; END $$;
+SELECT fhirpath_as_reference(:resource, '.Reference.value', 'Reference' );
+DO language plpgsql $$ BEGIN RAISE info 'reference .Reference.array Reference'; END $$;
+SELECT fhirpath_as_reference(:resource, '.Reference.array', 'Reference' );
+DO language plpgsql $$ BEGIN RAISE info 'reference .Reference.where.where(code=value).value Reference'; END $$;
+SELECT fhirpath_as_reference(:resource, '.Reference.where.where(code=value).value', 'Reference' );
+DO language plpgsql $$ BEGIN RAISE info 'reference .Reference.where.where(code=array).array Reference'; END $$;
+SELECT fhirpath_as_reference(:resource, '.Reference.where.where(code=array).array', 'Reference' );
+DO language plpgsql $$ BEGIN RAISE info 'reference .Reference.where.where(code=where).where.where(code=value).value Reference'; END $$;
+SELECT fhirpath_as_reference(:resource, '.Reference.where.where(code=where).where.where(code=value).value', 'Reference' );
+DO language plpgsql $$ BEGIN RAISE info 'reference .Reference.where.where(code=where).where.where(code=array).array Reference'; END $$;
+SELECT fhirpath_as_reference(:resource, '.Reference.where.where(code=where).where.where(code=array).array', 'Reference' );
+select '''{
+  "uri":{
+    "value": "http://some.url",
+    "array": ["http://datypic.com", "mailto:info@datypic.com","../%C3%A9dition.html","http://datypic.com/prod.html#shirt","urn:example:org","../édition.html"],
+    "where": [{ "code": "value", "value": "http://some.url" },
+              { "code": "array", "array": ["http://datypic.com", "mailto:info@datypic.com","../%C3%A9dition.html","http://datypic.com/prod.html#shirt","urn:example:org","../édition.html"] },
+              { "code": "where",
+                "where": [ {"code": "value", "value": "http://some.url"},
+                           {"code": "array", "array": ["http://datypic.com", "mailto:info@datypic.com","../%C3%A9dition.html","http://datypic.com/prod.html#shirt","urn:example:org","../édition.html"]} ] } ] },
+  "noise": "Some value"
+}''' resource \gset
+DO language plpgsql $$ BEGIN RAISE info 'uri .uri.value uri'; END $$;
+SELECT fhirpath_as_uri(:resource, '.uri.value', 'uri' );
+DO language plpgsql $$ BEGIN RAISE info 'uri .uri.array uri'; END $$;
+SELECT fhirpath_as_uri(:resource, '.uri.array', 'uri' );
+DO language plpgsql $$ BEGIN RAISE info 'uri .uri.where.where(code=value).value uri'; END $$;
+SELECT fhirpath_as_uri(:resource, '.uri.where.where(code=value).value', 'uri' );
+DO language plpgsql $$ BEGIN RAISE info 'uri .uri.where.where(code=array).array uri'; END $$;
+SELECT fhirpath_as_uri(:resource, '.uri.where.where(code=array).array', 'uri' );
+DO language plpgsql $$ BEGIN RAISE info 'uri .uri.where.where(code=where).where.where(code=value).value uri'; END $$;
+SELECT fhirpath_as_uri(:resource, '.uri.where.where(code=where).where.where(code=value).value', 'uri' );
+DO language plpgsql $$ BEGIN RAISE info 'uri .uri.where.where(code=where).where.where(code=array).array uri'; END $$;
+SELECT fhirpath_as_uri(:resource, '.uri.where.where(code=where).where.where(code=array).array', 'uri' );
+select '''{
+  "oid":{
+    "value": "http://some.url",
+    "array": ["http://datypic.com", "mailto:info@datypic.com","../%C3%A9dition.html","http://datypic.com/prod.html#shirt","urn:example:org","../édition.html"],
+    "where": [{ "code": "value", "value": "http://some.url" },
+              { "code": "array", "array": ["http://datypic.com", "mailto:info@datypic.com","../%C3%A9dition.html","http://datypic.com/prod.html#shirt","urn:example:org","../édition.html"] },
+              { "code": "where",
+                "where": [ {"code": "value", "value": "http://some.url"},
+                           {"code": "array", "array": ["http://datypic.com", "mailto:info@datypic.com","../%C3%A9dition.html","http://datypic.com/prod.html#shirt","urn:example:org","../édition.html"]} ] } ] },
+  "noise": "Some value"
+}''' resource \gset
+DO language plpgsql $$ BEGIN RAISE info 'uri .oid.value oid'; END $$;
+SELECT fhirpath_as_uri(:resource, '.oid.value', 'oid' );
+DO language plpgsql $$ BEGIN RAISE info 'uri .oid.array oid'; END $$;
+SELECT fhirpath_as_uri(:resource, '.oid.array', 'oid' );
+DO language plpgsql $$ BEGIN RAISE info 'uri .oid.where.where(code=value).value oid'; END $$;
+SELECT fhirpath_as_uri(:resource, '.oid.where.where(code=value).value', 'oid' );
+DO language plpgsql $$ BEGIN RAISE info 'uri .oid.where.where(code=array).array oid'; END $$;
+SELECT fhirpath_as_uri(:resource, '.oid.where.where(code=array).array', 'oid' );
+DO language plpgsql $$ BEGIN RAISE info 'uri .oid.where.where(code=where).where.where(code=value).value oid'; END $$;
+SELECT fhirpath_as_uri(:resource, '.oid.where.where(code=where).where.where(code=value).value', 'oid' );
+DO language plpgsql $$ BEGIN RAISE info 'uri .oid.where.where(code=where).where.where(code=array).array oid'; END $$;
+SELECT fhirpath_as_uri(:resource, '.oid.where.where(code=where).where.where(code=array).array', 'oid' );
+select '''{
+  "Quantity":{
+    "value": {
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},
+    "array": [
+{
+	"value": 30,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 20,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+} ],
+    "where": [{ "code": "value", "value": {
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+} },
+              { "code": "array", "array": [
+{
+	"value": 30,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 20,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+} ] },
+              { "code": "where",
+                "where": [ {"code": "value", "value": {
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+}},
+                           {"code": "array", "array": [
+{
+	"value": 30,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 40,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+},{
+	"value": 20,
+	"comparator": ">", "unit": "sm", "system": "C", "code": "sm"
+} ]} ] } ] },
+  "noise": "Some value"
+}''' resource \gset
+DO language plpgsql $$ BEGIN RAISE info 'quantity .Quantity.value Quantity'; END $$;
+SELECT fhirpath_as_quantity(:resource, '.Quantity.value', 'Quantity' );
+DO language plpgsql $$ BEGIN RAISE info 'quantity .Quantity.array Quantity'; END $$;
+SELECT fhirpath_as_quantity(:resource, '.Quantity.array', 'Quantity' );
+DO language plpgsql $$ BEGIN RAISE info 'quantity .Quantity.where.where(code=value).value Quantity'; END $$;
+SELECT fhirpath_as_quantity(:resource, '.Quantity.where.where(code=value).value', 'Quantity' );
+DO language plpgsql $$ BEGIN RAISE info 'quantity .Quantity.where.where(code=array).array Quantity'; END $$;
+SELECT fhirpath_as_quantity(:resource, '.Quantity.where.where(code=array).array', 'Quantity' );
+DO language plpgsql $$ BEGIN RAISE info 'quantity .Quantity.where.where(code=where).where.where(code=value).value Quantity'; END $$;
+SELECT fhirpath_as_quantity(:resource, '.Quantity.where.where(code=where).where.where(code=value).value', 'Quantity' );
+DO language plpgsql $$ BEGIN RAISE info 'quantity .Quantity.where.where(code=where).where.where(code=array).array Quantity'; END $$;
+SELECT fhirpath_as_quantity(:resource, '.Quantity.where.where(code=where).where.where(code=array).array', 'Quantity' );

@@ -1,0 +1,101 @@
+FROM debian:jessie
+
+ENV LANG en_US.utf8
+
+RUN mkdir /docker-entrypoint-initdb.d
+
+ENV PG_MAJOR 9.6
+ENV PGPRO_VERSION 9.6.1.2
+ENV PG_SHA256 6911ba75a5dff747d8edd7d501c97dcb1d3c2a41733998f1b2332d37f9879bd0
+
+RUN apt-get update
+RUN apt-get install -y locales build-essential bison flex git-core
+
+RUN apt-get install -y wget curl
+RUN apt-get install -y libreadline-dev
+
+RUN wget -O postgresql.tar.bz2 "http://repo.postgrespro.ru/pgpro-$PG_MAJOR/src/postgrespro-$PGPRO_VERSION.tar.bz2" \
+  && echo "$PG_SHA256 *postgresql.tar.bz2" | sha256sum -c - \
+	&& mkdir -p /usr/src/postgresql \
+	&& tar \
+		--extract \
+		--file postgresql.tar.bz2 \
+		--directory /usr/src/postgresql \
+		--strip-components 1 \
+	&& rm postgresql.tar.bz2
+
+RUN apt-get install -y zlib1g-dev libssl-dev
+
+RUN mkdir -p /pg
+
+RUN cd /usr/src/postgresql \
+	&& ./configure \
+    --prefix=/pg \
+		--with-openssl \
+	&& make -j "$(getconf _NPROCESSORS_ONLN)" world \
+	&& make install \
+	&& make -C contrib install
+
+RUN	cd /usr/src/postgresql && mkdir contrib/rum \
+	&& wget -O rum.tar.gz "https://github.com/postgrespro/rum/archive/0.1.tar.gz" \
+	&& tar xzf rum.tar.gz -C contrib/rum --strip-components=1 \
+	&& cd contrib/rum \
+	&& make -j "$(getconf _NPROCESSORS_ONLN)" install \
+  && ls /usr/src/postgresql
+
+RUN apt-get install -y clang-3.5 llvm-3.5-dev libedit-dev g++-4.8
+
+RUN export CXX="g++-4.8" CC="gcc-4.8" LD="g++-4.8" \
+  && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 90 \
+  && cd /usr/src/postgresql/contrib \
+  && wget https://github.com/plv8/plv8/archive/v1.5.5.tar.gz \
+  && tar -xvzf v1.5.5.tar.gz \
+  && cd plv8-1.5.5 \
+  && export PATH=/pg/bin:$PATH \
+  && make static \
+  && make install
+
+RUN	cd /usr/src/postgresql/contrib \
+  && git clone https://github.com/niquola/jsonknife  \
+	&& cd jsonknife \
+	&& make && make install
+
+EXPORT /pg
+
+FROM debian:jessie
+
+IMPORT /pg
+
+RUN apt-get update
+RUN apt-get install -y libssl1.0.0
+RUN groupadd -r postgres --gid=999 && useradd -r -g postgres --uid=999 postgres
+RUN mkdir /data && chown postgres:postgres /data
+
+ENV PATH /pg/bin:$PATH
+ENV PGDATA /data
+
+ENV GOSU_VERSION 1.9
+RUN set -x \
+    && apt-get update && apt-get install -y --no-install-recommends ca-certificates wget && rm -rf /var/lib/apt/lists/* \
+    && dpkgArch="$(dpkg --print-architecture | awk -F- '{ print $NF }')" \
+    && wget -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch" \
+    && wget -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch.asc" \
+    && export GNUPGHOME="$(mktemp -d)" \
+    && gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4 \
+    && gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu \
+    && rm -r "$GNUPGHOME" /usr/local/bin/gosu.asc \
+    && chmod +x /usr/local/bin/gosu \
+    && gosu nobody true \
+    && apt-get purge -y --auto-remove ca-certificates wget
+
+COPY docker-entrypoint.sh /
+
+VOLUME /data
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
+
+EXPOSE 5432
+
+CMD ["postgres"]
+
+PUSH docker/aidboxdb

@@ -1,0 +1,45 @@
+{
+	"number":{"value": 42,
+						"array": [40, 42, 43]},
+
+	"date": {"value": "1980-02-05T08:30" ,
+					 "array": ["1980-02-05T08:30", "1976-01", "1952-02-03"]},
+
+	"string": {"value": "Test",
+						 "array": ["Test", "Crush", "Fhirpath"]},
+
+	"token": {"value": {"use": "usual",
+											"type": { "coding": [
+												{"system": "sys1", "code": "code1"},
+												{"system": "sys2", "code": "code2"}
+											]},
+											"system": "isys",
+											"value": "value1",
+											"period": {"start": "2001-05-06"},
+											"assigner": {"display": "Acme Healthcare"} },
+					 "array": [ {"use": "usual",
+										 	 "type": { "coding": [
+													{"system": "sys1", "code": "code1"},
+													{"system": "sys2", "code": "code2"} ]},
+											 "system": "isys",
+											 "value": "value1",
+											 "period": {"start": "2001-05-06"},
+											 "assigner": {"display": "Acme Healthcare"}
+											}, {
+											 "use": "official",
+											 "type": { "coding": [ {
+													"system": "itsys", "code": "itcode"}
+									 			]},
+											 "system": "isys2",
+											 "value": "ival2" }]},
+
+	"reference": {"value": {"reference": "http://dom.io/ups/Patient/1"},
+								"array": [{"reference": "http://dom.io/ups/Patient/1"},
+													{"reference": "http://dom.io/ups/Patient/1"}]},
+	"composite": {},
+	"quantity": {},
+	"uri": {},
+	"_empty_obj": {},
+	"_empty_arr": [],
+	"_empty_str": ""
+}

@@ -1,0 +1,21 @@
+create extension jsonknife;
+SELECT knife_extract('{"a":{"b": {"c": 5.3}}}', '["a","b","c"]'); 
+INFO:  reduce array ["a", "b", "c"]
+INFO:  item a
+INFO:  item b
+INFO:  item c
+  knife_extract  
+-----------------
+ ["a", "b", "c"]
+(1 row)
+
+SELECT knife_extract('{"a":{"b": {"c": 5.3}}}', '["a",{"d": "ups"},"c"]'); 
+INFO:  reduce array ["a", {"d": "ups"}, "c"]
+INFO:  item a
+INFO:  item {"d": "ups"}
+INFO:  item c
+      knife_extract       
+--------------------------
+ ["a", {"d": "ups"}, "c"]
+(1 row)
+

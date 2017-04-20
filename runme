@@ -1,0 +1,1 @@
+ls -d * | entr bash -c 'make clean && make && sudo make install > /dev/null && make installcheck || echo "FAILED"'
