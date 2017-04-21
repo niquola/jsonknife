@@ -12,6 +12,115 @@
 #include "utils/jsonb.h"
 
 
+typedef void (*reduce_fn)(void *acc, JsonbValue *val);
+
+typedef enum MinMax {min, max} MinMax;  
+
+static MinMax minmax_from_string(char *s);
+
+typedef enum FPSearchType {FPToken, FPString, FPDate, FPNumeric, FPReference, FPTextSort, FPBool} FPSearchType;  
+typedef enum JValueType {JVObject, JVArray, JVString, JVNumeric, JVBoolean, JVNull} JValueType; 
+
+static Datum date_bound(char *date_str, long str_len,  MinMax minmax);
+
+typedef struct BasicAccumulator {
+	FPSearchType search_type;
+} BasicAccumulator;
+
+typedef struct NumericAccumulator {
+	FPSearchType search_type;
+	JsonbValue *json_path[100];
+	MinMax minmax;
+} NumericAccumulator;
+
+typedef struct StringAccumulator {
+	FPSearchType search_type;
+	StringInfoData *buf;
+} StringAccumulator;
+
+typedef struct ArrayAccumulator {
+	FPSearchType search_type;
+	ArrayBuildState *acc;
+	bool case_insensitive;
+} ArrayAccumulator;
+
+typedef struct DateAccumulator {
+	FPSearchType search_type;
+	Datum  acc;
+	MinMax minmax;
+} DateAccumulator;
+
+typedef struct TextAccumulator {
+	FPSearchType search_type;
+	text *acc;
+} TextAccumulator;
+
+typedef struct BoolAccumulator {
+	FPSearchType search_type;
+	bool acc;
+} BoolAccumulator;
+
+static void update_numeric(NumericAccumulator *nacc, Numeric num);
+/* static char * numeric_to_cstring(Numeric n); */
+
+MinMax
+minmax_from_string(char *s){
+	if(strcmp(s, "min") == 0){
+		return min;
+	} else if (strcmp(s, "max") == 0) {
+		return max;
+	} else {
+		elog(ERROR, "expected min or max");
+	}
+}
+
+static JValueType
+jsonbv_type(JsonbValue *v) {
+
+
+  if(v == NULL){
+    return JVNull;
+  }
+
+  JsonbIterator *array_it;
+  JsonbValue	array_value;
+  int next_it;
+
+  switch(v->type)
+    {
+    case jbvNull:
+      return JVNull; 
+      break;
+    case jbvBool:
+      return JVBoolean;
+      break;
+    case jbvString:
+      return JVString;
+      break;
+    case jbvNumeric:
+      return JVNumeric;
+      break;
+    case jbvBinary:
+    case jbvArray:
+    case jbvObject:
+      {
+
+        array_it = JsonbIteratorInit((JsonbContainer *) v->val.binary.data);
+        next_it = JsonbIteratorNext(&array_it, &array_value, true);
+        if(next_it == WJB_BEGIN_ARRAY){
+          return JVArray;
+        }
+        else if(next_it == WJB_BEGIN_OBJECT){
+          return JVObject;
+        }
+      }
+      break;
+    default:
+      return JVNull;
+      elog(ERROR, "Unknown jsonb type: %d", v->type);
+    }
+}
+
 static inline StringInfoData *
 append_jsonbv_to_buffer(StringInfoData *out, JsonbValue *v){
 	if (out == NULL)
@@ -64,22 +173,163 @@ initJsonbValue(JsonbValue *jbv, Jsonb *jb) {
 
 /* return value of obj key */
 static inline JsonbValue *
-jsonb_get_key(char *key, JsonbValue *obj){
-
-	JsonbValue	key_v;
-	key_v.type = jbvString;
-	key_v.val.string.len = strlen(key);
-	key_v.val.string.val = key;
-
-	/* test it's container (object) */
+jsonb_get_key(JsonbValue *obj, JsonbValue *key){
 	if(obj->type == jbvBinary){
-		/* we need to use special function to get valid JsonbValue */
-		return findJsonbValueFromContainer((JsonbContainer *) obj->val.binary.data , JB_FOBJECT, &key_v);
+		return findJsonbValueFromContainer((JsonbContainer *) obj->val.binary.data , JB_FOBJECT, key);
 	} else {
 		return NULL;
 	}
 }
 
+bool
+knife_match(JsonbValue *value, JsonbValue *pattern){
+  return true;
+}
+
+static long
+reduce_path(JsonbValue *jbv, JsonbValue **path, int current_idx, int path_len, void *acc, reduce_fn fn)
+{
+
+  JsonbValue *next_v = NULL;
+  JsonbValue *path_item;
+  JsonbIterator *array_it;
+  JsonbValue	array_value;
+  int next_it;
+
+  long num_results = 0;
+
+  check_stack_depth();
+
+  /* elog(INFO, "enter with: %s ", jsonbv_to_string(NULL, jbv)); */
+
+  if(jbv == NULL) { return 0; }
+
+  if( current_idx < path_len ){
+    path_item = path[current_idx];
+  }
+
+  if(jsonbv_type(jbv) == JVArray && ( path_item == NULL || jsonbv_type(path_item) != JVNumeric )){
+
+    array_it = JsonbIteratorInit((JsonbContainer *) jbv->val.binary.data);
+    next_it = JsonbIteratorNext(&array_it, &array_value, true);
+
+    while ((next_it = JsonbIteratorNext(&array_it, &array_value, true)) != WJB_DONE){
+      if(next_it == WJB_ELEM){
+        num_results += reduce_path(&array_value, path, current_idx, path_len, acc, fn);
+      }
+    }
+    return num_results;
+  }
+
+  if(current_idx == path_len && jbv != NULL){
+    fn(acc, jbv);
+    return 1;
+  }
+
+
+  switch(jsonbv_type(path_item)) {
+  case JVString:
+    /* elog(INFO, " in key: %s", jsonbv_to_string(NULL, path_item)); */
+    switch(jsonbv_type(jbv)) {
+    case JVObject:
+      /* elog(INFO, " * in object: %s", jsonbv_to_string(NULL, jbv)); */
+      next_v = jsonb_get_key(jbv, path_item);
+      if(next_v != NULL){
+        num_results += reduce_path(next_v, path, (current_idx + 1), path_len, acc, fn);
+      }
+      break;
+    }
+
+    break;
+
+  case JVNumeric:
+    /* elog(INFO, " in index: %s", jsonbv_to_string(NULL, path_item)); */
+    if(jsonbv_type(jbv) == JVArray) {
+
+      array_it = JsonbIteratorInit((JsonbContainer *) jbv->val.binary.data);
+      next_it = JsonbIteratorNext(&array_it, &array_value, true);
+      int array_index = 0;
+      int required_index = DatumGetInt32(DirectFunctionCall1(numeric_int4, NumericGetDatum(path_item->val.numeric)));
+      /* elog(INFO, "looking for index %d", required_index); */
+      while ((next_it = JsonbIteratorNext(&array_it, &array_value, true)) != WJB_DONE && array_index != -1){
+        if(next_it == WJB_ELEM){
+          if(array_index == required_index) {
+            num_results += reduce_path(&array_value, path, (current_idx +1), path_len, acc, fn);
+            array_index = -1;
+          }
+        }
+        array_index++;
+      }
+    }
+    break;
+  case JVObject:
+
+    switch(jsonbv_type(jbv)) {
+    case JVObject:
+      /* elog(INFO, "object"); */
+      if(knife_match(jbv, path_item)){
+        /* elog(INFO, "matched"); */
+        num_results += reduce_path(jbv, path, (current_idx + 1), path_len, acc, fn);
+      }
+      break;
+
+    default:
+      elog(ERROR, "Wrong jsonb type: %d", path_item->type);
+    }
+  }
+
+  return num_results;
+}
+
+
+void reduce_debug(void *acc, JsonbValue *val){
+  elog(INFO, "leaf: %s", jsonbv_to_string(NULL, val));
+}
+
+void reduce_jsonb_array(void *acc, JsonbValue *val){
+	ArrayAccumulator *tacc = (ArrayAccumulator *) acc;
+
+  /* elog(INFO, "leaf: %s", jsonbv_to_string(NULL, val)); */
+
+	if( val != NULL ) {
+		tacc->acc = accumArrayResult(tacc->acc, (Datum) JsonbValueToJsonb(val), false, JSONBOID, CurrentMemoryContext);
+	}
+}
+
+int
+to_json_path(Jsonb *path, JsonbValue **pathArr) {
+	int path_len = 0;
+
+	JsonbValue jpath;
+	initJsonbValue(&jpath, path);
+	JsonbValue *arr = &jpath;
+
+	JsonbIterator *iter;
+	JsonbValue	*item;
+	int next_it;
+
+	if (arr != NULL && arr->type == jbvBinary){
+
+		item = palloc(sizeof(JsonbValue));
+		iter = JsonbIteratorInit((JsonbContainer *) arr->val.binary.data);
+		next_it = JsonbIteratorNext(&iter, item, true);
+
+		if(next_it == WJB_BEGIN_ARRAY){
+			while ((next_it = JsonbIteratorNext(&iter, item, true)) != WJB_DONE){
+				/* elog(INFO, "next: %s", jsonbv_to_string(NULL, item)); */
+				if(next_it == WJB_ELEM){
+					pathArr[path_len] = item;
+					path_len++;
+				}
+
+				item = palloc(sizeof(JsonbValue));
+			}
+		}
+    pathArr[path_len + 1] = NULL;
+    return path_len;
+	}
+  return 0;
+}
 
 PG_MODULE_MAGIC;
 
@@ -90,33 +340,23 @@ knife_extract(PG_FUNCTION_ARGS) {
 	Jsonb      *jb = PG_GETARG_JSONB(0);
 	Jsonb      *path = PG_GETARG_JSONB(1);
 
-	JsonbValue jpath;
-	initJsonbValue(&jpath, path);
+	JsonbValue jdoc;
+	initJsonbValue(&jdoc, jb);
 
-	JsonbValue *arr = &jpath;
+	JsonbValue *obj = &jdoc;
 
-	elog(INFO, "reduce array %s", jsonbv_to_string(NULL, arr));
+	JsonbValue *pathArr[100];
+	int path_len = to_json_path(path, pathArr);
 
-	JsonbIterator *iter;
-	JsonbValue	item;
-	int next_it;
+	ArrayAccumulator acc;
+	acc.search_type = FPReference;
+	acc.acc = NULL;
+	acc.case_insensitive = false;
 
-	if (arr != NULL && arr->type == jbvBinary){
+	long num_results = reduce_path(obj, pathArr, 0, path_len, &acc, reduce_jsonb_array);
 
-		iter = JsonbIteratorInit((JsonbContainer *) arr->val.binary.data);
-		next_it = JsonbIteratorNext(&iter, &item, true);
-
-		if(next_it == WJB_BEGIN_ARRAY){
-			while ((next_it = JsonbIteratorNext(&iter, &item, true)) != WJB_DONE){
-				if(next_it == WJB_ELEM){
-
-					elog(INFO, "item %s", jsonbv_to_string(NULL, &item));
-
-				}
-			}
-		}
-	}
-
-
-	PG_RETURN_POINTER(path);
+	if (num_results > 0 && acc.acc != NULL)
+		PG_RETURN_ARRAYTYPE_P(makeArrayResult(acc.acc, CurrentMemoryContext));
+	else
+		PG_RETURN_NULL();
 }
