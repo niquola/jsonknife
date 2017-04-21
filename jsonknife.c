@@ -181,9 +181,99 @@ jsonb_get_key(JsonbValue *obj, JsonbValue *key){
 	}
 }
 
+/*
+ * Compare two scalar JsonbValues, returning -1, 0, or 1.
+ *
+ * Strings are compared using the default collation.  Used by B-tree
+ * operators, where a lexical sort order is generally expected.
+ */
+static int
+compareJsonbScalarValue(JsonbValue *aScalar, JsonbValue *bScalar)
+{
+	if (aScalar->type == bScalar->type)
+	{
+		switch (aScalar->type)
+		{
+			case jbvNull:
+				return 0;
+			case jbvString:
+				return varstr_cmp(aScalar->val.string.val,
+								  aScalar->val.string.len,
+								  bScalar->val.string.val,
+								  bScalar->val.string.len,
+								  DEFAULT_COLLATION_OID);
+			case jbvNumeric:
+				return DatumGetInt32(DirectFunctionCall2(numeric_cmp,
+									   PointerGetDatum(aScalar->val.numeric),
+									 PointerGetDatum(bScalar->val.numeric)));
+			case jbvBool:
+				if (aScalar->val.boolean == bScalar->val.boolean)
+					return 0;
+				else if (aScalar->val.boolean > bScalar->val.boolean)
+					return 1;
+				else
+					return -1;
+			default:
+				elog(ERROR, "invalid jsonb scalar type");
+		}
+	}
+	elog(ERROR, "jsonb scalar type mismatch");
+	return -1;
+}
+
 bool
 knife_match(JsonbValue *value, JsonbValue *pattern){
-  return true;
+  if(value == NULL || pattern == NULL) {
+    return false;
+  }
+
+  JValueType vtype = jsonbv_type(value);
+  JValueType ptype = jsonbv_type(pattern);
+
+  if((vtype == JVString || vtype == JVNumeric || vtype == JVBoolean) && (ptype == JVString || ptype == JVNumeric || ptype == JVBoolean)){
+
+    /* elog(INFO, "compare prim %d, %s with %s", */
+    /*      compareJsonbScalarValue(value, pattern), */
+    /*      jsonbv_to_string(NULL, value), */
+    /*      jsonbv_to_string(NULL, pattern)); */
+
+    if(compareJsonbScalarValue(value, pattern) == 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  if( vtype == JVObject && ptype == JVObject){
+    /* elog(INFO, "compare objects"); */
+
+    JsonbValue *path_item;
+    JsonbIterator *array_it;
+    JsonbValue	array_value;
+    JsonbValue *sample_value = NULL;
+    int next_it;
+    bool matched = true;
+
+    array_it = JsonbIteratorInit((JsonbContainer *) pattern->val.binary.data);
+    next_it = JsonbIteratorNext(&array_it, &array_value, true);
+
+    while (matched == true && (next_it = JsonbIteratorNext(&array_it, &array_value, true)) != WJB_DONE){
+      if (next_it == WJB_KEY){
+        /* elog(INFO, "compare keys"); */
+        sample_value = jsonb_get_key(value, &array_value);
+        if(sample_value == NULL){
+          matched = false;
+        }
+      } else if ( next_it == WJB_VALUE ) {
+        /* elog(INFO, "compare vals %s: %s", sample_value, &array_value); */
+        if(! knife_match(sample_value, &array_value)){
+          matched = false;
+        }
+      }
+    }
+    /* elog(INFO, "matched %d", matched); */
+    return matched;
+  }
 }
 
 static long

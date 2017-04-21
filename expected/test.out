@@ -1,21 +1,37 @@
 create extension jsonknife;
 SELECT knife_extract('{"a":{"b": {"c": 5.3}}}', '["a","b","c"]'); 
-INFO:  reduce array ["a", "b", "c"]
-INFO:  item a
-INFO:  item b
-INFO:  item c
-  knife_extract  
------------------
- ["a", "b", "c"]
+ knife_extract 
+---------------
+ {5.3}
 (1 row)
 
-SELECT knife_extract('{"a":{"b": {"c": 5.3}}}', '["a",{"d": "ups"},"c"]'); 
-INFO:  reduce array ["a", {"d": "ups"}, "c"]
-INFO:  item a
-INFO:  item {"d": "ups"}
-INFO:  item c
-      knife_extract       
---------------------------
- ["a", {"d": "ups"}, "c"]
+SELECT knife_extract('{"a":[{"b": [{"c": 5.3}, {"c": 6.3}]}, {"b": [{"c": 5.3}, {"c": 6.3}]}]}', '["a","b","c"]'); 
+   knife_extract   
+-------------------
+ {5.3,6.3,5.3,6.3}
+(1 row)
+
+SELECT knife_extract('{"a": [1, 2, {"b": {"c": 5.3}}, {"b": {"c": 100}}]}', '["a", 2 ,"b", "c"]'); 
+ knife_extract 
+---------------
+ {5.3}
+(1 row)
+
+SELECT knife_extract('{"name": [{"use": "official", "given": ["a", "b"]}, {"use": "common", "given": ["c", "d"]}]}', '["name",{"use": "official"},"given"]'); 
+   knife_extract   
+-------------------
+ {"\"a\"","\"b\""}
+(1 row)
+
+SELECT knife_extract('{"name": [{"use": "official", "given": ["a", "b"]}, {"use": "official", "given": ["c", "d"]}]}', '["name",{"use": "official"},"given"]'); 
+           knife_extract           
+-----------------------------------
+ {"\"a\"","\"b\"","\"c\"","\"d\""}
+(1 row)
+
+SELECT knife_extract('{"name": [{"a": {"b": 1}, "c": "ok"}, {"a": {"b": 2}, "c": "fail"}]}', '["name", {"a":{"b":1}}, "c"]');
+ knife_extract 
+---------------
+ {"\"ok\""}
 (1 row)
 
