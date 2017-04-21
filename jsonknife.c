@@ -387,13 +387,8 @@ void reduce_jsonb_array(void *acc, JsonbValue *val){
 }
 
 int
-to_json_path(Jsonb *path, JsonbValue **pathArr) {
+to_json_path(JsonbValue *arr, JsonbValue **pathArr) {
 	int path_len = 0;
-
-	JsonbValue jpath;
-	initJsonbValue(&jpath, path);
-	JsonbValue *arr = &jpath;
-
 	JsonbIterator *iter;
 	JsonbValue	*item;
 	int next_it;
@@ -421,29 +416,60 @@ to_json_path(Jsonb *path, JsonbValue **pathArr) {
   return 0;
 }
 
+
+static int
+reduce_paths(Jsonb *value, Jsonb *paths, void *acc, reduce_fn *fn) {
+
+  JsonbValue jdoc;
+  initJsonbValue(&jdoc, value);
+
+  JsonbValue jpaths;
+  initJsonbValue(&jpaths, paths);
+
+  JsonbIterator *path_iter;
+  JsonbValue	path_item;
+  int next_it;
+
+	JsonbValue *pathArr[100];
+	int path_len;
+
+  long num_results = 0;
+
+
+    if (jpaths.type == jbvBinary) {
+
+      path_iter = JsonbIteratorInit((JsonbContainer *) jpaths.val.binary.data);
+
+      next_it = JsonbIteratorNext(&path_iter, &path_item, true);
+
+      if(next_it == WJB_BEGIN_ARRAY){
+        while ((next_it = JsonbIteratorNext(&path_iter, &path_item, true)) != WJB_DONE){
+          if(next_it == WJB_ELEM){
+            path_len = to_json_path(&path_item, pathArr);
+            num_results =+ reduce_path(&jdoc, pathArr, 0, path_len, acc, fn);
+          }
+        }
+      }
+    }
+
+  return num_results;
+}
+
 PG_MODULE_MAGIC;
 
 PG_FUNCTION_INFO_V1(knife_extract);
 Datum
 knife_extract(PG_FUNCTION_ARGS) {
 
-	Jsonb      *jb = PG_GETARG_JSONB(0);
-	Jsonb      *path = PG_GETARG_JSONB(1);
-
-	JsonbValue jdoc;
-	initJsonbValue(&jdoc, jb);
-
-	JsonbValue *obj = &jdoc;
-
-	JsonbValue *pathArr[100];
-	int path_len = to_json_path(path, pathArr);
+	Jsonb      *value = PG_GETARG_JSONB(0);
+	Jsonb      *paths = PG_GETARG_JSONB(1);
 
 	ArrayAccumulator acc;
 	acc.search_type = FPReference;
 	acc.acc = NULL;
 	acc.case_insensitive = false;
 
-	long num_results = reduce_path(obj, pathArr, 0, path_len, &acc, reduce_jsonb_array);
+	long num_results = reduce_paths(value, paths, &acc, reduce_jsonb_array);
 
 	if (num_results > 0 && acc.acc != NULL)
 		PG_RETURN_ARRAYTYPE_P(makeArrayResult(acc.acc, CurrentMemoryContext));
