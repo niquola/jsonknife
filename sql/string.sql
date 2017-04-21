@@ -1,0 +1,13 @@
+SELECT jsonknife_extract_string('{"name": "Patient"}', '[["name"]]');
+SELECT jsonknife_extract_string('{"name": {"given": "Given name"}}', '[["name", "given"]]');
+SELECT jsonknife_extract_string('{"name": ["Patient1", "Patient2"]}', '[["name"]]');
+SELECT jsonknife_extract_string('{"name": [{"given": "Given name1"}, {"given": "Given name2"}]}', '[["name", "given"]]');
+SELECT jsonknife_extract_string('{"name": [{"given": "Given name1"}, {"given": "Given name2"}]}', '[["name", "given"]]');
+SELECT jsonknife_extract_string('{"name": {"given": "Given name", "lastname": "Last name"}}', '[["name", "given"], ["name", "lastname"]]');
+SELECT jsonknife_extract_string('{"name": [{"given": "Given name1", "lastname": "Last name1"}, {"given": "Given name2", "lastname": "Last name2"}]}', '[["name", "given"], ["name", "lastname"]]');
+SELECT jsonknife_extract_string('{"name": [{"given": ["Given name1.1","Given name1.2"], "lastname": ["Last name1.1", "Last name1.2"]}, {"given": "Given name2", "lastname": "Last name2"}]}', '[["name", "given"], ["name", "lastname"]]');
+SELECT jsonknife_extract_string('{"name": [{"use": "official", "given": "Given name"}, {"use": "github", "given": "Aitem"}]}', '[["name", {"use": "github"}, "given"]]');
+SELECT jsonknife_extract_string('{"name": [{"use": "official", "given": "Given name"}, {"use": "github", "given": "Aitem"}]}', '[["name", {"use": "official"}, "given"]]');
+SELECT jsonknife_extract_string('{"name": [{"use": "official", "given": "Given name"}, {"use": "github", "given": ["Aitem", "Niquola"]}]}', '[["name", {"use": "github"}, "given"]]');
+SELECT jsonknife_extract_string('{"name": [{"use": "official", "given": "Given name"}, {"use": "github", "given": [{"use": "official", "nickname":"Aitem"}, "Niquola"]}]}', '[["name", {"use": "github"}, {"use": "official"}, "nickname"]]');
+SELECT jsonknife_extract_string('{"name": [{"use": "official", "given": "Given name"}, {"use": "github", "given": [{"use": "official", "nickname":"Aitem"}, "Niquola"]}]}', '[["name", {"use": "github"}, {"use": "official"}, "nickname"], ["name", {"use": "official"}, "given"]]');
