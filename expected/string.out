@@ -1,0 +1,69 @@
+SELECT jsonknife_extract_string('{"name": "Patient"}', '[["name"]]');
+     jsonknife_extract_string      
+-----------------------------
+ $Patient$
+(1 row) SELECT jsonknife_extract_string('{"name": {"given": "Given name"}}', '[["name", "given"]]');
+     jsonknife_extract_string      
+-----------------------------
+ $Given name$
+(1 row)
+
+SELECT jsonknife_extract_string('{"name": ["Patient1", "Patient2"]}', '[["name"]]');
+     jsonknife_extract_string      
+-----------------------------
+ $Patient1$Patient2$
+(1 row)
+
+SELECT jsonknife_extract_string('{"name": [{"given": "Given name1"}, {"given": "Given name2"}]}', '[["name", "given"]]');
+     jsonknife_extract_string      
+-----------------------------
+ $Given name1$Given name2$
+(1 row)
+
+SELECT jsonknife_extract_string('{"name": {"given": "Given name", "lastname": "Last name"}}', '[["name", "given"], ["name", "lastname"]]');
+     jsonknife_extract_string      
+-----------------------------
+ $Given name$Last name$
+(1 row)
+
+SELECT jsonknife_extract_string('{"name": [{"given": "Given name1", "lastname": "Last name1"}, {"given": "Given name2", "lastname": "Last name2"}]}', '[["name", "given"], ["name", "lastname"]]');
+     jsonknife_extract_string      
+-----------------------------
+ $Given name1$Last name1$Given name2$Last name2$
+(1 row)
+
+SELECT jsonknife_extract_string('{"name": [{"given": ["Given name1.1","Given name1.2"], "lastname": ["Last name1.1", "Last name1.2"]}, {"given": "Given name2", "lastname": "Last name2"}]}', '[["name", "given"], ["name", "lastname"]]');
+     jsonknife_extract_string      
+-----------------------------
+ $Given name1.1$Given name1.2$Last name1.1$Last name1.2$Given name2$Last name2$
+(1 row)
+
+SELECT jsonknife_extract_string('{"name": [{"use": "official", "given": "Given name"}, {"use": "github", "given": "Aitem"}]}', '[["name", {"use": "github"}, "given"]]');
+     jsonknife_extract_string      
+-----------------------------
+ $Aitem$
+(1 row)
+
+SELECT jsonknife_extract_string('{"name": [{"use": "official", "given": "Given name"}, {"use": "github", "given": "Aitem"}]}', '[["name", {"use": "official"}, "given"]]');
+     jsonknife_extract_string      
+-----------------------------
+ $Given name$
+(1 row)
+
+SELECT jsonknife_extract_string('{"name": [{"use": "official", "given": "Given name"}, {"use": "github", "given": ["Aitem", "Niquola"]}]}', '[["name", {"use": "github"}, "given"]]');
+     jsonknife_extract_string      
+-----------------------------
+ $Aitem$Niquola$
+(1 row)
+
+SELECT jsonknife_extract_string('{"name": [{"use": "official", "given": "Given name"}, {"use": "github", "given": [{"use": "official", "nickname":"Aitem"}, "Niquola"]}]}', '[["name", {"use": "github"}, {"use": "official"}, "nickname"]]');
+     jsonknife_extract_string      
+-----------------------------
+ $Aitem$
+(1 row)
+
+SELECT jsonknife_extract_string('{"name": [{"use": "official", "given": "Given name"}, {"use": "github", "given": [{"use": "official", "nickname":"Aitem"}, "Niquola"]}]}', '[["name", {"use": "github"}, {"use": "official"}, "nickname"], ["name", {"use": "official"}, "given"]]');
+     jsonknife_extract_string      
+-----------------------------
+ $Aitem$Given name$
+(1 row)
