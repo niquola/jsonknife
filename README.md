@@ -33,19 +33,29 @@ make && sudo make install && make installcheck
 
 ## Examples
 
+Path for data extraction from jsonb document is encoded as json vector, where
 
-```sql
-
-SELECT knife_extract_jsonb('{"a": {"b": [{"c": 1}, {"c": 2}]}}', '["a", "b", "c"]')
-
-=> '[1,2]'::jsonb
-
-SELECT knife_extract_string(
-  '{"name": [{"use": "official", "given": ["Abram"]}]',
-  '["name", {"use": "official"}, "given"]'
-);
+* string means object key
+* number - array index
+* object - is pattern to match
 
 
+```json
+//extracting by path:
+
+["frends", {"best": true}, "name" ]
+
+//from:
+
+{"frends": [
+  {"best": true, "name": "niquola"},
+  {"best": true, "name": "ivan"},
+  {"best": false, "name": "avraam"}
+]}
+
+// produces:
+
+["niquola", "ivan"]
 ```
 
-
+For more examples take a look at [tests](exepected/test.out).
