@@ -58,4 +58,4 @@ Path for data extraction from jsonb document is encoded as json vector, where
 ["niquola", "ivan"]
 ```
 
-For more examples take a look at [tests](exepected/test.out).
+For more examples take a look at [tests](https://github.com/niquola/jsonknife/blob/master/expected/test.out).
