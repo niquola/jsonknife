@@ -18,45 +18,33 @@ typedef enum MinMax {min, max} MinMax;
 
 static MinMax minmax_from_string(char *s);
 
-typedef enum FPSearchType {FPToken, FPString, FPDate, FPNumeric, FPReference, FPTextSort, FPBool} FPSearchType;  
 typedef enum JValueType {JVObject, JVArray, JVString, JVNumeric, JVBoolean, JVNull} JValueType; 
 
 static Datum date_bound(char *date_str, long str_len,  MinMax minmax);
 
 typedef struct BasicAccumulator {
-	FPSearchType search_type;
 } BasicAccumulator;
 
 typedef struct NumericAccumulator {
-	FPSearchType search_type;
-	JsonbValue *json_path[100];
 	MinMax minmax;
+	Numeric acc;
 } NumericAccumulator;
 
-typedef struct StringAccumulator {
-	FPSearchType search_type;
-	StringInfoData *buf;
-} StringAccumulator;
-
 typedef struct ArrayAccumulator {
-	FPSearchType search_type;
 	ArrayBuildState *acc;
 	bool case_insensitive;
 } ArrayAccumulator;
 
 typedef struct DateAccumulator {
-	FPSearchType search_type;
 	Datum  acc;
 	MinMax minmax;
 } DateAccumulator;
 
 typedef struct TextAccumulator {
-	FPSearchType search_type;
 	text *acc;
 } TextAccumulator;
 
 typedef struct BoolAccumulator {
-	FPSearchType search_type;
 	bool acc;
 } BoolAccumulator;
 
@@ -162,6 +150,19 @@ jsonbv_to_string(StringInfoData *out, JsonbValue *v){
 		out = makeStringInfo();
 	append_jsonbv_to_buffer(out, v);
 	return out->data;
+}
+
+text *jsonbv_to_text(StringInfoData *out, JsonbValue *v){
+	if (v == NULL) 
+		return NULL;
+
+	if (out == NULL)
+		out = makeStringInfo();
+
+	appendStringInfoSpaces(out, VARHDRSZ);
+	append_jsonbv_to_buffer(out, v);
+	SET_VARSIZE(out->data, out->len);
+	return (text *)out->data;
 }
 
 void
@@ -446,7 +447,7 @@ reduce_paths(Jsonb *value, Jsonb *paths, void *acc, reduce_fn *fn) {
         while ((next_it = JsonbIteratorNext(&path_iter, &path_item, true)) != WJB_DONE){
           if(next_it == WJB_ELEM){
             path_len = to_json_path(&path_item, pathArr);
-            num_results =+ reduce_path(&jdoc, pathArr, 0, path_len, acc, fn);
+            num_results += reduce_path(&jdoc, pathArr, 0, path_len, acc, fn);
           }
         }
       }
@@ -465,7 +466,6 @@ knife_extract(PG_FUNCTION_ARGS) {
 	Jsonb      *paths = PG_GETARG_JSONB(1);
 
 	ArrayAccumulator acc;
-	acc.search_type = FPReference;
 	acc.acc = NULL;
 	acc.case_insensitive = false;
 
@@ -475,4 +475,371 @@ knife_extract(PG_FUNCTION_ARGS) {
 		PG_RETURN_ARRAYTYPE_P(makeArrayResult(acc.acc, CurrentMemoryContext));
 	else
 		PG_RETURN_NULL();
+}
+
+void reduce_text_array(void *acc, JsonbValue *val){
+	ArrayAccumulator *tacc = (ArrayAccumulator *) acc;
+
+  /* elog(INFO, "leaf: %s", jsonbv_to_string(NULL, val)); */
+
+	if( val != NULL && jsonbv_type(val) == JVString ) {
+		tacc->acc = accumArrayResult(tacc->acc,
+                                 (Datum) jsonbv_to_text(NULL, val),
+                                 false, TEXTOID, CurrentMemoryContext);
+	}
+}
+
+
+PG_FUNCTION_INFO_V1(knife_extract_text);
+Datum
+knife_extract_text(PG_FUNCTION_ARGS) {
+
+	Jsonb      *value = PG_GETARG_JSONB(0);
+	Jsonb      *paths = PG_GETARG_JSONB(1);
+
+	ArrayAccumulator acc;
+	acc.acc = NULL;
+	acc.case_insensitive = false;
+
+	long num_results = reduce_paths(value, paths, &acc, reduce_text_array);
+
+	if (num_results > 0 && acc.acc != NULL)
+		PG_RETURN_ARRAYTYPE_P(makeArrayResult(acc.acc, CurrentMemoryContext));
+	else
+		PG_RETURN_NULL();
+}
+
+void
+update_numeric(NumericAccumulator *nacc, Numeric num){
+	if(nacc->acc == NULL){
+		nacc->acc = num;
+	} else {
+
+		bool gt = DirectFunctionCall2(numeric_gt, (Datum) nacc->acc, (Datum) num);
+		/* elog(INFO, "%s > %s, gt %d min %d", numeric_to_cstring(num), numeric_to_cstring(nacc->acc), gt, nacc->minmax); */
+		if (nacc->minmax == min && gt == 1){
+			nacc->acc = num;
+		} else if (nacc->minmax == max && gt == 0){
+			nacc->acc = num;
+		}
+	}
+}
+
+void reduce_numeric(void *acc, JsonbValue *val){
+
+	NumericAccumulator *nacc = acc;
+
+	/* elog(INFO, "extract as number [%s] %s", nacc->element_type, jsonbv_to_string(NULL, val)); */
+
+	if( val == NULL ) {return;}
+
+	if( val->type == jbvNumeric){
+
+		update_numeric(nacc, val->val.numeric);
+
+	} else if( val->type == jbvString){
+
+		long len =val->val.string.len;
+    char *num_str = palloc( len+ 1);
+		memcpy(num_str, val->val.string.val, len);
+		num_str[len] = '\0';
+
+		update_numeric(nacc, DatumGetNumeric(DirectFunctionCall3(numeric_in, CStringGetDatum(num_str), 0, -1)));
+
+	} else if ( val->type == jbvBinary ) {
+
+		JsonbValue *value = jsonb_get_key("value", val); 
+
+		if(value != NULL && value->type == jbvNumeric){
+			update_numeric(nacc, value->val.numeric);
+		}
+
+	} else {
+		elog(ERROR, "Could not extract as number %s", jsonbv_to_string(NULL, val));
+	}
+}
+
+PG_FUNCTION_INFO_V1(knife_extract_max_numeric);
+Datum
+knife_extract_max_numeric(PG_FUNCTION_ARGS) {
+
+	Jsonb      *value = PG_GETARG_JSONB(0);
+	Jsonb      *paths = PG_GETARG_JSONB(1);
+
+	NumericAccumulator acc;
+	acc.minmax = max;
+	acc.acc = NULL;
+
+	long num_results = reduce_paths(value, paths, &acc, reduce_numeric);
+
+	if (acc.acc != NULL)
+		PG_RETURN_NUMERIC(acc.acc);
+	else
+		PG_RETURN_NULL();
+}
+
+PG_FUNCTION_INFO_V1(knife_extract_min_numeric);
+Datum
+knife_extract_min_numeric(PG_FUNCTION_ARGS) {
+
+	Jsonb      *value = PG_GETARG_JSONB(0);
+	Jsonb      *paths = PG_GETARG_JSONB(1);
+
+	NumericAccumulator acc;
+	acc.minmax = min;
+	acc.acc = NULL;
+
+	long num_results = reduce_paths(value, paths, &acc, reduce_numeric);
+
+	if (acc.acc != NULL)
+		PG_RETURN_NUMERIC(acc.acc);
+	else
+		PG_RETURN_NULL();
+}
+
+void reduce_numeric_array(void *acc, JsonbValue *val){
+	ArrayAccumulator *tacc = (ArrayAccumulator *) acc;
+
+  /* elog(INFO, "leaf: %s", jsonbv_to_string(NULL, val)); */
+
+	if( val != NULL && jsonbv_type(val) == JVNumeric ) {
+		tacc->acc = accumArrayResult(tacc->acc,
+                                 (Datum) val->val.numeric,
+                                 false, NUMERICOID, CurrentMemoryContext);
+	}
+}
+
+PG_FUNCTION_INFO_V1(knife_extract_numeric);
+Datum
+knife_extract_numeric(PG_FUNCTION_ARGS) {
+
+	Jsonb      *value = PG_GETARG_JSONB(0);
+	Jsonb      *paths = PG_GETARG_JSONB(1);
+
+	ArrayAccumulator acc;
+	acc.acc = NULL;
+	acc.case_insensitive = false;
+
+	long num_results = reduce_paths(value, paths, &acc, reduce_numeric_array);
+
+	if (num_results > 0 && acc.acc != NULL)
+		PG_RETURN_ARRAYTYPE_P(makeArrayResult(acc.acc, CurrentMemoryContext));
+	else
+		PG_RETURN_NULL();
+}
+
+Datum
+date_bound(char *date_str, long str_len,  MinMax minmax){
+	if(date_str != NULL) {
+		char *ref_str = "0000-01-01T00:00:00";
+		long ref_str_len = strlen(ref_str);
+
+		long date_in_len = (str_len > ref_str_len) ? str_len : ref_str_len;
+	    char *date_in = palloc(date_in_len + 1);
+		memcpy(date_in, date_str, str_len);
+
+		/* elog(INFO, "date_str: '%s', %d", date_str, str_len ); */
+
+		if( str_len < ref_str_len){
+			long diff = (ref_str_len - str_len);
+			memcpy(date_in + str_len, ref_str + str_len, diff);
+		}
+
+		date_in[date_in_len] = '\0';
+
+		/* elog(INFO, "input: '%s', %d, %d", date_in, date_in_len, ref_str_len); */
+
+		Datum min_date = DirectFunctionCall3(timestamptz_in,
+											 CStringGetDatum(date_in),
+											 ObjectIdGetDatum(InvalidOid),
+											 Int32GetDatum(-1));
+		if(minmax == min) {
+			return min_date;
+		} else if (minmax == max ) {
+			Timestamp	max_date;
+			int			tz;
+			struct pg_tm tt, *tm = &tt;
+			fsec_t		fsec;
+
+			if (timestamp2tm(min_date, &tz, tm, &fsec, NULL, NULL) != 0)
+				ereport(ERROR,
+						(errcode(ERRCODE_DATETIME_VALUE_OUT_OF_RANGE),
+						 errmsg("timestamp out of range")));
+
+			/* elog(INFO, "get tm %d y %d m %d d %d fsec", tm->tm_year, tm->tm_mon, tm->tm_mday, fsec); */
+
+			if (str_len < 5) {
+				tm->tm_mon = 12;
+			}
+			if (str_len < 8) {
+				tm->tm_mday = day_tab[isleap(tm->tm_year)][tm->tm_mon - 1];
+			}
+			if (str_len < 11) {
+				tm->tm_hour = 23;
+			}
+			if (str_len < 14) {
+				tm->tm_min = 59;
+				tm->tm_sec = 59;
+			}
+			if (str_len < 17) {
+				tm->tm_sec = 59;
+			}
+
+			/* round fsec up .555 to .555999 */
+			/* this is not strict algorytm so if user enter .500 we will lose 00 */
+			/* better to analyze initial string */
+			int fsec_up = 0, temp, count = 1;
+			if(fsec == 0){
+				fsec_up = 999999;
+			} else {
+				temp = fsec;
+				while(temp > 0) {
+					if(temp%10 == 0) {
+						temp = temp/10;
+						fsec_up += 9 * count; 
+						count= count * 10;
+					} else {
+						break;
+					}
+				}
+			}
+
+
+			if (tm2timestamp(tm, (fsec + fsec_up), &tz, &max_date) != 0)
+				ereport(ERROR,
+						(errcode(ERRCODE_DATETIME_VALUE_OUT_OF_RANGE),
+						 errmsg("timestamp out of range")));
+
+			return max_date;
+		} else {
+			elog(ERROR, "expected min or max value");
+		}
+	}
+	return 0;
+}
+
+
+void reduce_timestamptz(void *acc, JsonbValue *val){
+	DateAccumulator *dacc = acc;
+	/* elog(INFO, "extract as date %s as %s", jsonbv_to_string(NULL, val), dacc->element_type);   */
+
+	if(val != NULL && val->type == jbvString) {
+
+		Datum date = date_bound(val->val.string.val, val->val.string.len, dacc->minmax);
+
+		if(dacc->minmax == min) {
+			if(dacc->acc != 0){
+				int gt = DirectFunctionCall2(timestamptz_cmp_timestamp, date, dacc->acc);
+				/* elog(INFO, "compare %d", gt); */
+				if(gt < 0) {
+					dacc->acc = date;
+				}
+			} else if (date != 0) {
+				dacc->acc = date;
+			}
+		} else if (dacc->minmax == max ) {
+			if(dacc->acc != 0){
+				int gt = DirectFunctionCall2(timestamptz_cmp_timestamp, date, dacc->acc);
+				if(gt > 0) {
+					dacc->acc = date;
+				}
+			} else if (date != 0){
+				dacc->acc = date;
+			}
+
+		} else {
+			elog(ERROR, "expected min or max value");
+		}
+	}
+
+}
+
+
+
+PG_FUNCTION_INFO_V1(knife_extract_max_timestamptz);
+Datum
+knife_extract_max_timestamptz(PG_FUNCTION_ARGS) {
+
+	Jsonb      *value = PG_GETARG_JSONB(0);
+	Jsonb      *paths = PG_GETARG_JSONB(1);
+
+	DateAccumulator acc;
+	acc.minmax = max;
+	acc.acc = 0;
+
+	long num_results = reduce_paths(value, paths, &acc, reduce_timestamptz);
+
+	if (acc.acc != NULL)
+		PG_RETURN_NUMERIC(acc.acc);
+	else
+		PG_RETURN_NULL();
+}
+
+PG_FUNCTION_INFO_V1(knife_extract_min_timestamptz);
+Datum
+knife_extract_min_timestamptz(PG_FUNCTION_ARGS) {
+
+	Jsonb      *value = PG_GETARG_JSONB(0);
+	Jsonb      *paths = PG_GETARG_JSONB(1);
+
+	DateAccumulator acc;
+	acc.minmax = min;
+	acc.acc = 0;
+
+	long num_results = reduce_paths(value, paths, &acc, reduce_timestamptz);
+
+	if (acc.acc != NULL)
+		PG_RETURN_NUMERIC(acc.acc);
+	else
+		PG_RETURN_NULL();
+}
+
+void reduce_timestamptz_array(void *acc, JsonbValue *val){
+	ArrayAccumulator *tacc = (ArrayAccumulator *) acc;
+
+  /* elog(INFO, "leaf: %s", jsonbv_to_string(NULL, val)); */
+
+	if( val != NULL && jsonbv_type(val) == JVString ) {
+		tacc->acc = accumArrayResult(tacc->acc,
+                                 (Datum) date_bound(val->val.string.val, val->val.string.len, min),
+                                 false, TIMESTAMPTZOID, CurrentMemoryContext);
+	}
+
+}
+
+PG_FUNCTION_INFO_V1(knife_extract_timestamptz);
+Datum
+knife_extract_timestamptz(PG_FUNCTION_ARGS) {
+
+	Jsonb      *value = PG_GETARG_JSONB(0);
+	Jsonb      *paths = PG_GETARG_JSONB(1);
+
+	ArrayAccumulator acc;
+	acc.acc = NULL;
+	acc.case_insensitive = false;
+
+	long num_results = reduce_paths(value, paths, &acc, reduce_timestamptz_array);
+
+	if (num_results > 0 && acc.acc != NULL)
+		PG_RETURN_ARRAYTYPE_P(makeArrayResult(acc.acc, CurrentMemoryContext));
+	else
+		PG_RETURN_NULL();
+}
+
+
+
+PG_FUNCTION_INFO_V1(knife_date_bound);
+
+Datum
+knife_date_bound(PG_FUNCTION_ARGS) {
+	char       *date = text_to_cstring(PG_GETARG_TEXT_P(0));
+	MinMax minmax = minmax_from_string(text_to_cstring(PG_GETARG_TEXT_P(1))); 
+
+	Datum res = date_bound(date, strlen(date), minmax);
+
+	if(res != 0){
+		return res;
+	} else {
+		PG_RETURN_NULL();
+	}
 }
