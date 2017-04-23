@@ -21,6 +21,9 @@ static MinMax minmax_from_string(char *s);
 typedef enum JValueType {JVObject, JVArray, JVString, JVNumeric, JVBoolean, JVNull} JValueType; 
 
 static Datum date_bound(char *date_str, long str_len,  MinMax minmax);
+static text *jsonbv_to_text(StringInfoData *out, JsonbValue *v);
+static void initJsonbValue(JsonbValue *jbv, Jsonb *jb);
+static bool knife_match(JsonbValue *value, JsonbValue *pattern);
 
 typedef struct BasicAccumulator {
 } BasicAccumulator;
@@ -65,10 +68,7 @@ minmax_from_string(char *s){
 static JValueType
 jsonbv_type(JsonbValue *v) {
 
-
-  if(v == NULL){
-    return JVNull;
-  }
+  if(v == NULL){ return JVNull; }
 
   JsonbIterator *array_it;
   JsonbValue	array_value;
@@ -107,6 +107,7 @@ jsonbv_type(JsonbValue *v) {
       return JVNull;
       elog(ERROR, "Unknown jsonb type: %d", v->type);
     }
+  return JVNull;
 }
 
 static inline StringInfoData *
@@ -165,8 +166,7 @@ text *jsonbv_to_text(StringInfoData *out, JsonbValue *v){
 	return (text *)out->data;
 }
 
-void
-initJsonbValue(JsonbValue *jbv, Jsonb *jb) {
+void initJsonbValue(JsonbValue *jbv, Jsonb *jb) {
 	jbv->type = jbvBinary;
 	jbv->val.binary.data = &jb->root;
 	jbv->val.binary.len = VARSIZE_ANY_EXHDR(jb);
@@ -222,8 +222,7 @@ compareJsonbScalarValue(JsonbValue *aScalar, JsonbValue *bScalar)
 	return -1;
 }
 
-bool
-knife_match(JsonbValue *value, JsonbValue *pattern){
+bool knife_match(JsonbValue *value, JsonbValue *pattern){
   if(value == NULL || pattern == NULL) {
     return false;
   }
@@ -248,7 +247,7 @@ knife_match(JsonbValue *value, JsonbValue *pattern){
   if( vtype == JVObject && ptype == JVObject){
     /* elog(INFO, "compare objects"); */
 
-    JsonbValue *path_item;
+    /* JsonbValue *path_item; */
     JsonbIterator *array_it;
     JsonbValue	array_value;
     JsonbValue *sample_value = NULL;
@@ -275,6 +274,7 @@ knife_match(JsonbValue *value, JsonbValue *pattern){
     /* elog(INFO, "matched %d", matched); */
     return matched;
   }
+  return false;
 }
 
 static long
@@ -321,18 +321,14 @@ reduce_path(JsonbValue *jbv, JsonbValue **path, int current_idx, int path_len, v
   switch(jsonbv_type(path_item)) {
   case JVString:
     /* elog(INFO, " in key: %s", jsonbv_to_string(NULL, path_item)); */
-    switch(jsonbv_type(jbv)) {
-    case JVObject:
+    if(jsonbv_type(jbv) == JVObject){
       /* elog(INFO, " * in object: %s", jsonbv_to_string(NULL, jbv)); */
       next_v = jsonb_get_key(jbv, path_item);
       if(next_v != NULL){
         num_results += reduce_path(next_v, path, (current_idx + 1), path_len, acc, fn);
       }
-      break;
     }
-
     break;
-
   case JVNumeric:
     /* elog(INFO, " in index: %s", jsonbv_to_string(NULL, path_item)); */
     if(jsonbv_type(jbv) == JVArray) {
@@ -354,29 +350,28 @@ reduce_path(JsonbValue *jbv, JsonbValue **path, int current_idx, int path_len, v
     }
     break;
   case JVObject:
-
-    switch(jsonbv_type(jbv)) {
-    case JVObject:
-      /* elog(INFO, "object"); */
+    if(jsonbv_type(jbv) == JVObject){
       if(knife_match(jbv, path_item)){
         /* elog(INFO, "matched"); */
         num_results += reduce_path(jbv, path, (current_idx + 1), path_len, acc, fn);
       }
-      break;
-
-    default:
-      elog(ERROR, "Wrong jsonb type: %d", path_item->type);
     }
+    break;
+  case JVArray:
+  case JVBoolean:
+  case JVNull:
+    break;
   }
 
   return num_results;
 }
 
+/* static */
+/* void reduce_debug(void *acc, JsonbValue *val){ */
+/*   elog(INFO, "leaf: %s", jsonbv_to_string(NULL, val)); */
+/* } */
 
-void reduce_debug(void *acc, JsonbValue *val){
-  elog(INFO, "leaf: %s", jsonbv_to_string(NULL, val));
-}
-
+static
 void reduce_jsonb_array(void *acc, JsonbValue *val){
 	ArrayAccumulator *tacc = (ArrayAccumulator *) acc;
 
@@ -387,8 +382,9 @@ void reduce_jsonb_array(void *acc, JsonbValue *val){
 	}
 }
 
-int
-to_json_path(JsonbValue *arr, JsonbValue **pathArr) {
+
+static
+int to_json_path(JsonbValue *arr, JsonbValue **pathArr) {
 	int path_len = 0;
 	JsonbIterator *iter;
 	JsonbValue	*item;
@@ -419,7 +415,7 @@ to_json_path(JsonbValue *arr, JsonbValue **pathArr) {
 
 
 static int
-reduce_paths(Jsonb *value, Jsonb *paths, void *acc, reduce_fn *fn) {
+reduce_paths(Jsonb *value, Jsonb *paths, void *acc, reduce_fn fn) {
 
   JsonbValue jdoc;
   initJsonbValue(&jdoc, value);
@@ -477,6 +473,7 @@ knife_extract(PG_FUNCTION_ARGS) {
 		PG_RETURN_NULL();
 }
 
+static
 void reduce_text_array(void *acc, JsonbValue *val){
 	ArrayAccumulator *tacc = (ArrayAccumulator *) acc;
 
@@ -509,8 +506,8 @@ knife_extract_text(PG_FUNCTION_ARGS) {
 		PG_RETURN_NULL();
 }
 
-void
-update_numeric(NumericAccumulator *nacc, Numeric num){
+static
+void update_numeric(NumericAccumulator *nacc, Numeric num){
 	if(nacc->acc == NULL){
 		nacc->acc = num;
 	} else {
@@ -525,6 +522,7 @@ update_numeric(NumericAccumulator *nacc, Numeric num){
 	}
 }
 
+static
 void reduce_numeric(void *acc, JsonbValue *val){
 
 	NumericAccumulator *nacc = acc;
@@ -545,15 +543,6 @@ void reduce_numeric(void *acc, JsonbValue *val){
 		num_str[len] = '\0';
 
 		update_numeric(nacc, DatumGetNumeric(DirectFunctionCall3(numeric_in, CStringGetDatum(num_str), 0, -1)));
-
-	} else if ( val->type == jbvBinary ) {
-
-		JsonbValue *value = jsonb_get_key("value", val); 
-
-		if(value != NULL && value->type == jbvNumeric){
-			update_numeric(nacc, value->val.numeric);
-		}
-
 	} else {
 		elog(ERROR, "Could not extract as number %s", jsonbv_to_string(NULL, val));
 	}
@@ -570,7 +559,7 @@ knife_extract_max_numeric(PG_FUNCTION_ARGS) {
 	acc.minmax = max;
 	acc.acc = NULL;
 
-	long num_results = reduce_paths(value, paths, &acc, reduce_numeric);
+	reduce_paths(value, paths, &acc, reduce_numeric);
 
 	if (acc.acc != NULL)
 		PG_RETURN_NUMERIC(acc.acc);
@@ -589,7 +578,7 @@ knife_extract_min_numeric(PG_FUNCTION_ARGS) {
 	acc.minmax = min;
 	acc.acc = NULL;
 
-	long num_results = reduce_paths(value, paths, &acc, reduce_numeric);
+	reduce_paths(value, paths, &acc, reduce_numeric);
 
 	if (acc.acc != NULL)
 		PG_RETURN_NUMERIC(acc.acc);
@@ -597,6 +586,7 @@ knife_extract_min_numeric(PG_FUNCTION_ARGS) {
 		PG_RETURN_NULL();
 }
 
+static
 void reduce_numeric_array(void *acc, JsonbValue *val){
 	ArrayAccumulator *tacc = (ArrayAccumulator *) acc;
 
@@ -719,6 +709,7 @@ date_bound(char *date_str, long str_len,  MinMax minmax){
 }
 
 
+static
 void reduce_timestamptz(void *acc, JsonbValue *val){
 	DateAccumulator *dacc = acc;
 	/* elog(INFO, "extract as date %s as %s", jsonbv_to_string(NULL, val), dacc->element_type);   */
@@ -767,9 +758,9 @@ knife_extract_max_timestamptz(PG_FUNCTION_ARGS) {
 	acc.minmax = max;
 	acc.acc = 0;
 
-	long num_results = reduce_paths(value, paths, &acc, reduce_timestamptz);
+	reduce_paths(value, paths, &acc, reduce_timestamptz);
 
-	if (acc.acc != NULL)
+	if (acc.acc != 0)
 		PG_RETURN_NUMERIC(acc.acc);
 	else
 		PG_RETURN_NULL();
@@ -786,14 +777,15 @@ knife_extract_min_timestamptz(PG_FUNCTION_ARGS) {
 	acc.minmax = min;
 	acc.acc = 0;
 
-	long num_results = reduce_paths(value, paths, &acc, reduce_timestamptz);
+	reduce_paths(value, paths, &acc, reduce_timestamptz);
 
-	if (acc.acc != NULL)
+	if (acc.acc != 0)
 		PG_RETURN_NUMERIC(acc.acc);
 	else
 		PG_RETURN_NULL();
 }
 
+static
 void reduce_timestamptz_array(void *acc, JsonbValue *val){
 	ArrayAccumulator *tacc = (ArrayAccumulator *) acc;
 
