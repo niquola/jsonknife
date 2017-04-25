@@ -65,3 +65,15 @@ SELECT knife_date_bound('2005-08-09T13:30:42Z',  'min');
 SELECT knife_date_bound('2005-08-09T13:30:42Z',  'max');
 SELECT knife_date_bound('2005-08-09T13:30:42+03', 'min');
 SELECT knife_date_bound('2005-08-09T13:30:42+03', 'max');
+
+SELECT knife_extract_text('{"resourceType": "Some", "name": [{"use": "official", "given": ["nicola"], "family": ["Ryzhikov"]}, {"use": "common", "given": ["c", "d"]}]}', '[["name","given"],["name","family"]]');
+
+drop table  if exists patient;
+create table patient (id serial, resource jsonb);
+
+insert into  patient (resource)
+values
+('{"resourceType": "Some", "name": [{"use": "official", "given": ["nicola"], "family": ["Ryzhikov"]}, {"use": "common", "given": ["c", "d"]}]}'),
+('{"name": [{"given": ["Nikolai"]}], "resourceType": "Patient"}');
+
+SELECT knife_extract_text(resource, '[["name","given"],["name","family"]]') from patient;

@@ -282,7 +282,7 @@ reduce_path(JsonbValue *jbv, JsonbValue **path, int current_idx, int path_len, v
 {
 
   JsonbValue *next_v = NULL;
-  JsonbValue *path_item;
+  JsonbValue *path_item = NULL;
   JsonbIterator *array_it;
   JsonbValue	array_value;
   int next_it;
