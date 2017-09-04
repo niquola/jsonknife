@@ -60,7 +60,6 @@ SELECT knife_extract_max_timestamptz('{"a":{"b": {"c": "1980-02-05T08:30"}}}', '
 
 SELECT knife_extract_timestamptz('{"a":{"b": {"c": ["1980", "1980-02", "1980-02-05", "1980-02-05T08"]}}}', '[["a", "b", "c"]]');
 
-
 SELECT knife_date_bound('2005-08-09T13:30:42Z',  'min');
 SELECT knife_date_bound('2005-08-09T13:30:42Z',  'max');
 SELECT knife_date_bound('2005-08-09T13:30:42+03', 'min');
@@ -68,7 +67,6 @@ SELECT knife_date_bound('2005-08-09T13:30:42+03', 'max');
 
 SELECT knife_extract_text('{"resourceType": "Some", "name": [{"use": "official", "given": ["nicola"], "family": ["Ryzhikov"]}, {"use": "common", "given": ["c", "d"]}]}', '[["name","given"],["name","family"]]');
 
-drop table  if exists patient;
 create table patient (id serial, resource jsonb);
 
 insert into  patient (resource)

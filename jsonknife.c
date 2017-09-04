@@ -357,7 +357,7 @@ reduce_path(JsonbValue *jbv, JsonbValue **path, int current_idx, int path_len, v
 	long num_results = 0;
 
 	check_stack_depth();
-	/*elog(INFO, "enter with: %s", jsonbv_to_string(jbv));*/
+	/* elog(INFO, "enter with: %s", jsonbv_to_string(jbv)); */
 
 	/*
 	 * if JsonbValue is empty then nothing to do
@@ -365,7 +365,9 @@ reduce_path(JsonbValue *jbv, JsonbValue **path, int current_idx, int path_len, v
 	if (jbv == NULL) return 0;
 
 	Assert(jbv != NULL);
-	path_item = path[current_idx];
+
+	if (current_idx < path_len)
+		path_item = path[current_idx];
 
 	/*
 	 * Unwrap an array if path_item is not a number
