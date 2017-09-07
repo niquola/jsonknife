@@ -429,16 +429,18 @@ reduce_path(JsonbValue *jbv, JsonbValue **path, int current_idx, int path_len, v
 				
 				array_it = JsonbIteratorInit((JsonbContainer *) jbv->val.binary.data);
 				next_it = JsonbIteratorNext(&array_it, &array_value, true);
+				
 				/* elog(INFO, "looking for index %d", required_index); */
-				while ((next_it = JsonbIteratorNext(&array_it, &array_value, true)) != WJB_DONE
-					   && array_index != -1)
+
+				while ((next_it = JsonbIteratorNext(&array_it, &array_value, true)) != WJB_DONE)
 				{
-					if(next_it == WJB_ELEM)
+					/* elog(INFO, "looking for index %d, current index %d", required_index, array_index); */
+					if (next_it == WJB_ELEM)
 					{
-						if(array_index == required_index)
+						if (array_index == required_index)
 						{
-							num_results += reduce_path(&array_value, path, (current_idx +1), path_len, acc, fn);
-							array_index = -1;
+							num_results += reduce_path(&array_value, path, (current_idx + 1), path_len, acc, fn);
+							break;
 						}
 					}
 					array_index++;
