@@ -529,7 +529,7 @@ void reduce_numeric(void *acc, JsonbValue *val){
 
 	/* elog(INFO, "extract as number [%s] %s", nacc->element_type, jsonbv_to_string(NULL, val)); */
 
-	if( val == NULL ) {return;}
+	if( val == NULL || val->type == jbvNull) {return;}
 
 	if( val->type == jbvNumeric){
 
