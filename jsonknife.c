@@ -11,6 +11,9 @@
 #include "catalog/pg_collation.h"
 #include "utils/jsonb.h"
 
+#ifndef PG_GETARG_JSONB
+#define PG_GETARG_JSONB(x) DatumGetJsonbP(PG_GETARG_DATUM(x))
+#endif
 
 typedef void (*reduce_fn)(void *acc, JsonbValue *val);
 
