@@ -182,4 +182,23 @@ SELECT knife_date_bound('2005-08-09T13:30:42+03', 'max');
 -------------------------------------
  Tue Aug 09 03:30:42.999999 2005 PDT
 (1 row)
+  
+SELECT knife_extract_text('{"resourceType": "Some", "name": [{"use": "official", "given": ["nicola"], "family": ["Ryzhikov"]}, {"use": "common", "given": ["c", "d"]}]}', '[["name","given"],["name","family"]]');
+  knife_extract_text   
+-----------------------
+ {nicola,c,d,Ryzhikov}
+(1 row)
 
+drop table  if exists patient;
+NOTICE:  table "patient" does not exist, skipping
+create table patient (id serial, resource jsonb);
+insert into  patient (resource)
+values
+('{"resourceType": "Some", "name": [{"use": "official", "given": ["nicola"], "family": ["Ryzhikov"]}, {"use": "common", "given": ["c", "d"]}]}'),
+('{"name": [{"given": ["Nikolai"]}], "resourceType": "Patient"}');
+SELECT knife_extract_text(resource, '[["name","given"],["name","family"]]') from patient;
+  knife_extract_text   
+-----------------------
+ {nicola,c,d,Ryzhikov}
+ {Nikolai}
+(2 rows)
