@@ -250,32 +250,46 @@ bool knife_match(JsonbValue *value, JsonbValue *pattern){
   if( vtype == JVObject && ptype == JVObject){
     /* elog(INFO, "compare objects"); */
 
-    /* JsonbValue *path_item; */
-    JsonbIterator *array_it;
-    JsonbValue	array_value;
-    JsonbValue *sample_value = NULL;
-    int next_it;
-    bool matched = true;
+    JsonbIterator *patt_it;
+    patt_it = JsonbIteratorInit((JsonbContainer *) pattern->val.binary.data);
 
-    array_it = JsonbIteratorInit((JsonbContainer *) pattern->val.binary.data);
-    next_it = JsonbIteratorNext(&array_it, &array_value, true);
+    JsonbIterator *val_it;
+    val_it = JsonbIteratorInit((JsonbContainer *) value->val.binary.data);
 
-    while (matched == true && (next_it = JsonbIteratorNext(&array_it, &array_value, true)) != WJB_DONE){
-      if (next_it == WJB_KEY){
-        /* elog(INFO, "compare keys"); */
-        sample_value = jsonb_get_key(value, &array_value);
-        if(sample_value == NULL){
-          matched = false;
-        }
-      } else if ( next_it == WJB_VALUE ) {
-        /* elog(INFO, "compare vals %s: %s", sample_value, &array_value); */
-        if(! knife_match(sample_value, &array_value)){
-          matched = false;
-        }
-      }
-    }
+	bool res = JsonbDeepContains(&val_it, &patt_it);
+
+    /* elog(INFO, "MATCH %d, %s with %s", */
+	/* 	 res, */
+    /*      jsonbv_to_string(NULL, value), */
+    /*      jsonbv_to_string(NULL, pattern)); */
+
+	return res;
+
+    /* /\* JsonbValue *path_item; *\/ */
+    /* JsonbValue	array_value; */
+    /* JsonbValue *sample_value = NULL; */
+    /* int next_it; */
+    /* bool matched = true; */
+
+    /* array_it = JsonbIteratorInit((JsonbContainer *) pattern->val.binary.data); */
+    /* next_it = JsonbIteratorNext(&array_it, &array_value, true); */
+
+    /* while (matched == true && (next_it = JsonbIteratorNext(&array_it, &array_value, true)) != WJB_DONE){ */
+    /*   if (next_it == WJB_KEY){ */
+    /*     elog(INFO, "compare keys"); */
+    /*     sample_value = jsonb_get_key(value, &array_value); */
+    /*     if(sample_value == NULL){ */
+    /*       matched = false; */
+    /*     } */
+    /*   } else if ( next_it == WJB_VALUE ) { */
+    /*     elog(INFO, "compare vals %s: %s", sample_value, &array_value); */
+    /*     if(! knife_match(sample_value, &array_value)){ */
+    /*       matched = false; */
+    /*     } */
+    /*   } */
+    /* } */
     /* elog(INFO, "matched %d", matched); */
-    return matched;
+    /* return matched; */
   }
   return false;
 }

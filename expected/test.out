@@ -228,3 +228,106 @@ SELECT knife_extract_text(resource, '[["name","given"],["name","family"]]') from
  {Nikolai}
 (2 rows)
 
+SELECT knife_extract(
+  $$
+  {"participant":
+   [
+    {
+     "type": [{"coding": [{"code": "A1", "d": "d"},{"code": "B1"}]}],
+     "individual": {"id": "i1", "rt": "pract"}
+     },
+    {
+      "type": [{"coding": [{"code": "B1", "d": "d"},{"code": "A1", "d": "d"}]}],
+      "individual": {"id": "i2", "rt": "pract"}
+    },
+    {
+      "type": [{"coding": [{"code": "B2", "d": "d"},{"code": "A2", "d": "d"}]}],
+      "individual": {"id": "i3", "rt": "pract"}
+    }
+   ]
+  }$$,
+  $$[["participant", {"type": [{"coding": [{"code": "A1"}]}]}, "individual", "id"]]$$
+  );
+    knife_extract    
+---------------------
+ {"\"i1\"","\"i2\""}
+(1 row)
+
+-- empty
+SELECT knife_extract(
+$$
+{"participant":
+[
+  {
+  "type": [{"coding": [{"code": "A1", "d": "d"},{"code": "B1"}]}],
+  "individual": {"id": "i1", "rt": "pract"}
+  },
+  {
+  "type": [{"coding": [{"code": "B1", "d": "d"},{"code": "A1", "d": "d"}]}],
+  "individual": {"id": "i2", "rt": "pract"}
+  },
+  {
+  "type": [{"coding": [{"code": "B2", "d": "d"},{"code": "A2", "d": "d"}]}],
+  "individual": {"id": "i3", "rt": "pract"}
+  }
+]
+}$$,
+$$[["participant", {"type": [{"coding": [{"code": "UPS"}]}]}, "individual", "id"]]$$
+);
+ knife_extract 
+---------------
+ 
+(1 row)
+
+-- double filter
+SELECT knife_extract(
+$$
+{"participant":
+[
+{
+"type": [{"coding": [{"code": "A1", "d": "d"},{"code": "B"}]}],
+"individual": {"id": "i1", "rt": "pract"}
+},
+{
+"type": [{"coding": [{"code": "B1", "d": "d"},{"code": "A1", "d": "d"}]}],
+"individual": {"id": "i2", "rt": "pract"}
+},
+{
+"type": [{"coding": [{"code": "B2", "d": "d"},{"code": "A2", "d": "d"}]}],
+"individual": {"id": "i3", "rt": "pract"}
+}
+]
+}$$,
+$$[["participant", {"type": [{"coding": [{"code": "A1"}, {"code": "B"}]}]}, "individual", "id"]]$$
+);
+ knife_extract 
+---------------
+ {"\"i1\""}
+(1 row)
+
+-- change order
+SELECT knife_extract(
+$$
+{"participant":
+[
+{
+"type": [{"coding": [{"code": "B"},{"code": "A1", "d": "d"}]}],
+"individual": {"id": "i1", "rt": "pract"}
+},
+{
+"type": [{"coding": [{"code": "B1", "d": "d"},{"code": "A1", "d": "d"}]}],
+"individual": {"id": "i2", "rt": "pract"}
+},
+{
+"type": [{"coding": [{"code": "B2", "d": "d"},{"code": "A2", "d": "d"}]}],
+"individual": {"id": "i3", "rt": "pract"}
+}
+]
+}$$,
+$$[["participant", {"type": [{"coding": [{"code": "A1"}, {"code": "B"}]}]}, "individual", "id"]]$$
+);
+ knife_extract 
+---------------
+ {"\"i1\""}
+(1 row)
+

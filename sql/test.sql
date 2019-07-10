@@ -83,3 +83,91 @@ values
 ('{"name": [{"given": ["Nikolai"]}], "resourceType": "Patient"}');
 
 SELECT knife_extract_text(resource, '[["name","given"],["name","family"]]') from patient;
+
+
+SELECT knife_extract(
+  $$
+  {"participant":
+   [
+    {
+     "type": [{"coding": [{"code": "A1", "d": "d"},{"code": "B1"}]}],
+     "individual": {"id": "i1", "rt": "pract"}
+     },
+    {
+      "type": [{"coding": [{"code": "B1", "d": "d"},{"code": "A1", "d": "d"}]}],
+      "individual": {"id": "i2", "rt": "pract"}
+    },
+    {
+      "type": [{"coding": [{"code": "B2", "d": "d"},{"code": "A2", "d": "d"}]}],
+      "individual": {"id": "i3", "rt": "pract"}
+    }
+   ]
+  }$$,
+  $$[["participant", {"type": [{"coding": [{"code": "A1"}]}]}, "individual", "id"]]$$
+  );
+
+-- empty
+SELECT knife_extract(
+$$
+{"participant":
+[
+  {
+  "type": [{"coding": [{"code": "A1", "d": "d"},{"code": "B1"}]}],
+  "individual": {"id": "i1", "rt": "pract"}
+  },
+  {
+  "type": [{"coding": [{"code": "B1", "d": "d"},{"code": "A1", "d": "d"}]}],
+  "individual": {"id": "i2", "rt": "pract"}
+  },
+  {
+  "type": [{"coding": [{"code": "B2", "d": "d"},{"code": "A2", "d": "d"}]}],
+  "individual": {"id": "i3", "rt": "pract"}
+  }
+]
+}$$,
+$$[["participant", {"type": [{"coding": [{"code": "UPS"}]}]}, "individual", "id"]]$$
+);
+
+-- double filter
+SELECT knife_extract(
+$$
+{"participant":
+[
+{
+"type": [{"coding": [{"code": "A1", "d": "d"},{"code": "B"}]}],
+"individual": {"id": "i1", "rt": "pract"}
+},
+{
+"type": [{"coding": [{"code": "B1", "d": "d"},{"code": "A1", "d": "d"}]}],
+"individual": {"id": "i2", "rt": "pract"}
+},
+{
+"type": [{"coding": [{"code": "B2", "d": "d"},{"code": "A2", "d": "d"}]}],
+"individual": {"id": "i3", "rt": "pract"}
+}
+]
+}$$,
+$$[["participant", {"type": [{"coding": [{"code": "A1"}, {"code": "B"}]}]}, "individual", "id"]]$$
+);
+
+-- change order
+SELECT knife_extract(
+$$
+{"participant":
+[
+{
+"type": [{"coding": [{"code": "B"},{"code": "A1", "d": "d"}]}],
+"individual": {"id": "i1", "rt": "pract"}
+},
+{
+"type": [{"coding": [{"code": "B1", "d": "d"},{"code": "A1", "d": "d"}]}],
+"individual": {"id": "i2", "rt": "pract"}
+},
+{
+"type": [{"coding": [{"code": "B2", "d": "d"},{"code": "A2", "d": "d"}]}],
+"individual": {"id": "i3", "rt": "pract"}
+}
+]
+}$$,
+$$[["participant", {"type": [{"coding": [{"code": "A1"}, {"code": "B"}]}]}, "individual", "id"]]$$
+);

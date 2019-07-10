@@ -14,7 +14,7 @@ git clone https://github.com/postgres/postgres
 make
 sudo make install
 
-export PGDATA=/tmp/pg
+export PGDATA=/opt/pg
 export PGPORT=5777\n
 export PG_BIN=/opt/local/pg/bin\n
 bin/initdb -D $PGDATA -E utf8
