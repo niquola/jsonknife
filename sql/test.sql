@@ -171,3 +171,24 @@ $$
 }$$,
 $$[["participant", {"type": [{"coding": [{"code": "A1"}, {"code": "B"}]}]}, "individual", "id"]]$$
 );
+
+SELECT knife_extract('{"a":{"b": {"c": [1,2,3,4]}}}', '[["a","b","c",0]]');
+
+SELECT knife_extract('{"a":{"b": {"c": [1,2,3,4]}}}', '[["a","b","c",1]]');
+
+SELECT knife_extract('{"a":{"b": {"c": [1,2,3,4]}}}', '[["a","b","c",2]]');
+
+SELECT knife_extract('{"a":{"b": {"c": [1,2,3,4]}}}', '[["a","b","c",3]]');
+
+SELECT knife_extract('{"a":{"b": {"c": [1,2,3,4]}}}', '[["a","b","c",4]]');
+
+SELECT knife_extract('{"a":{"b": {"c": [1,2,3,4]}}}', '[["a","b","c",44]]');
+
+SELECT knife_extract('{"a":{"b": [{"c": [1,2,3,4]},{"c": [11,22,33,43]}]}}',
+  '[["a","b",0, "c",0]]');
+
+SELECT knife_extract('{"a":{"b": [{"c": [1,2,3,4]},{"c": [11,22,33,43]}]}}',
+'[["a","b",1, "c",0]]');
+
+SELECT knife_extract('{"a":{"b": [{"c": [1,2,3,4]},{"c": [11,22,33,43]}]}}',
+'[["a","b",2, "c",0]]');

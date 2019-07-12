@@ -357,12 +357,13 @@ reduce_path(JsonbValue *jbv, JsonbValue **path, int current_idx, int path_len, v
       /* elog(INFO, "looking for index %d", required_index); */
       while ((next_it = JsonbIteratorNext(&array_it, &array_value, true)) != WJB_DONE && array_index != -1){
         if(next_it == WJB_ELEM){
+			/* elog(INFO, " %d = %d", array_index, required_index); */
           if(array_index == required_index) {
             num_results += reduce_path(&array_value, path, (current_idx +1), path_len, acc, fn);
-            array_index = -1;
+			break;
           }
+		  array_index++;
         }
-        array_index++;
       }
     }
     break;
