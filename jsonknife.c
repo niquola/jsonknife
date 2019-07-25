@@ -639,6 +639,17 @@ knife_extract_numeric(PG_FUNCTION_ARGS) {
 Datum
 date_bound(char *date_str, long str_len,  MinMax minmax){
 	if(date_str != NULL) {
+		/* elog(INFO, "date_str: '%s', %d", date_str, str_len ); */
+
+		if(str_len > 18) {
+			date_str[str_len] = '\0';
+			return DirectFunctionCall3(timestamptz_in,
+									   CStringGetDatum(date_str),
+									   ObjectIdGetDatum(InvalidOid),
+									   Int32GetDatum(-1));
+
+		}
+
 		char *ref_str = "0000-01-01T00:00:00";
 		long ref_str_len = strlen(ref_str);
 
@@ -646,7 +657,6 @@ date_bound(char *date_str, long str_len,  MinMax minmax){
 	    char *date_in = palloc(date_in_len + 1);
 		memcpy(date_in, date_str, str_len);
 
-		/* elog(INFO, "date_str: '%s', %d", date_str, str_len ); */
 
 		if( str_len < ref_str_len){
 			long diff = (ref_str_len - str_len);
@@ -693,27 +703,28 @@ date_bound(char *date_str, long str_len,  MinMax minmax){
 				tm->tm_sec = 59;
 			}
 
+			/* turn of this millisecond  suspicios transform */
 			/* round fsec up .555 to .555999 */
 			/* this is not strict algorytm so if user enter .500 we will lose 00 */
 			/* better to analyze initial string */
-			int fsec_up = 0, temp, count = 1;
-			if(fsec == 0){
-				fsec_up = 999999;
-			} else {
-				temp = fsec;
-				while(temp > 0) {
-					if(temp%10 == 0) {
-						temp = temp/10;
-						fsec_up += 9 * count; 
-						count= count * 10;
-					} else {
-						break;
-					}
-				}
-			}
+			/* int fsec_up = 0, temp, count = 1; */
+			/* if(fsec == 0){ */
+			/* 	fsec_up = 999999; */
+			/* } else { */
+			/* 	temp = fsec; */
+			/* 	while(temp > 0) { */
+			/* 		if(temp%10 == 0) { */
+			/* 			temp = temp/10; */
+			/* 			fsec_up += 9 * count;  */
+			/* 			count= count * 10; */
+			/* 		} else { */
+			/* 			break; */
+			/* 		} */
+			/* 	} */
+			/* } */
 
 
-			if (tm2timestamp(tm, (fsec + fsec_up), &tz, &max_date) != 0)
+			if (tm2timestamp(tm, fsec, &tz, &max_date) != 0)
 				ereport(ERROR,
 						(errcode(ERRCODE_DATETIME_VALUE_OUT_OF_RANGE),
 						 errmsg("timestamp out of range")));

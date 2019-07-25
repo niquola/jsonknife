@@ -124,33 +124,33 @@ SELECT knife_extract_min_timestamptz('{"a":{"b": {"c": "1980-02-05T08:30"}}}', '
 (1 row)
 
 SELECT knife_extract_max_timestamptz('{"a":{"b": {"c": "1980"}}}', '[["a", "b", "c"]]');
-    knife_extract_max_timestamptz    
--------------------------------------
- Wed Dec 31 23:59:59.999999 1980 PST
+ knife_extract_max_timestamptz 
+-------------------------------
+ Wed Dec 31 23:59:59 1980 PST
 (1 row)
 
 SELECT knife_extract_max_timestamptz('{"a":{"b": {"c": "1980-02"}}}', '[["a","b","c"]]');
-    knife_extract_max_timestamptz    
--------------------------------------
- Fri Feb 29 23:59:59.999999 1980 PST
+ knife_extract_max_timestamptz 
+-------------------------------
+ Fri Feb 29 23:59:59 1980 PST
 (1 row)
 
 SELECT knife_extract_max_timestamptz('{"a":{"b": {"c": "1980-02-05"}}}', '[["a","b","c"]]');
-    knife_extract_max_timestamptz    
--------------------------------------
- Tue Feb 05 23:59:59.999999 1980 PST
+ knife_extract_max_timestamptz 
+-------------------------------
+ Tue Feb 05 23:59:59 1980 PST
 (1 row)
 
 SELECT knife_extract_max_timestamptz('{"a":{"b": {"c": "1980-02-05T08"}}}', '[["a","b","c"]]');
-    knife_extract_max_timestamptz    
--------------------------------------
- Tue Feb 05 08:59:59.999999 1980 PST
+ knife_extract_max_timestamptz 
+-------------------------------
+ Tue Feb 05 08:59:59 1980 PST
 (1 row)
 
 SELECT knife_extract_max_timestamptz('{"a":{"b": {"c": "1980-02-05T08:30"}}}', '[["a","b","c"]]');
-    knife_extract_max_timestamptz    
--------------------------------------
- Tue Feb 05 08:30:59.999999 1980 PST
+ knife_extract_max_timestamptz 
+-------------------------------
+ Tue Feb 05 08:30:59 1980 PST
 (1 row)
 
 SELECT knife_extract_timestamptz('{"a":{"b": {"c": ["1980", "1980-02", "1980-02-05", "1980-02-05T08"]}}}', '[["a", "b", "c"]]');
@@ -166,9 +166,9 @@ SELECT knife_date_bound('2005-08-09T13:30:42Z',  'min');
 (1 row)
 
 SELECT knife_date_bound('2005-08-09T13:30:42Z',  'max');
-          knife_date_bound           
--------------------------------------
- Tue Aug 09 06:30:42.999999 2005 PDT
+       knife_date_bound       
+------------------------------
+ Tue Aug 09 06:30:42 2005 PDT
 (1 row)
 
 SELECT knife_date_bound('2005-08-09T13:30:42+03', 'min');
@@ -178,16 +178,40 @@ SELECT knife_date_bound('2005-08-09T13:30:42+03', 'min');
 (1 row)
 
 SELECT knife_date_bound('2005-08-09T13:30:42+03', 'max');
-          knife_date_bound           
--------------------------------------
- Tue Aug 09 03:30:42.999999 2005 PDT
+       knife_date_bound       
+------------------------------
+ Tue Aug 09 03:30:42 2005 PDT
+(1 row)
+
+SELECT knife_date_bound('2019-07-03T02:28:57.3042803+00:00', 'min');
+          knife_date_bound          
+------------------------------------
+ Tue Jul 02 19:28:57.30428 2019 PDT
+(1 row)
+
+SELECT knife_date_bound('2019-07-03T02:28:57.3042803+00:00', 'max');
+          knife_date_bound          
+------------------------------------
+ Tue Jul 02 19:28:57.30428 2019 PDT
+(1 row)
+
+SELECT knife_date_bound('2019-07-03T02:28:57.3042803+00:00', 'min') < '2019-07-03T02:28:57.3042803+00:00'::timestamptz;
+ ?column? 
+----------
+ f
+(1 row)
+
+SELECT knife_date_bound('2019-07-03T02:28:57.3042803+00:00', 'max') > '2019-07-03T02:28:57.3042803+00:00'::timestamptz;
+ ?column? 
+----------
+ f
 (1 row)
 
 SET TIME ZONE 'UTC';
 SELECT knife_date_bound('2001-01-01', 'max');
-          knife_date_bound           
--------------------------------------
- Mon Jan 01 23:59:59.999999 2001 UTC
+       knife_date_bound       
+------------------------------
+ Mon Jan 01 23:59:59 2001 UTC
 (1 row)
 
 SELECT knife_date_bound('2001-01-01', 'min');
@@ -203,9 +227,9 @@ SELECT knife_extract_min_timestamptz('{"receivedTime": "2001-01-01"}', '[["recei
 (1 row)
 
 SELECT knife_extract_max_timestamptz('{"receivedTime": "2001-01-01"}', '[["receivedTime"]]');
-    knife_extract_max_timestamptz    
--------------------------------------
- Mon Jan 01 23:59:59.999999 2001 UTC
+ knife_extract_max_timestamptz 
+-------------------------------
+ Mon Jan 01 23:59:59 2001 UTC
 (1 row)
 
 SELECT knife_extract_text('{"resourceType": "Some", "name": [{"use": "official", "given": ["nicola"], "family": ["Ryzhikov"]}, {"use": "common", "given": ["c", "d"]}]}', '[["name","given"],["name","family"]]');
