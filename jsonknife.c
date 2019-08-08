@@ -641,15 +641,6 @@ date_bound(char *date_str, long str_len,  MinMax minmax){
 	if(date_str != NULL) {
 		/* elog(INFO, "date_str: '%s', %d", date_str, str_len ); */
 
-		if(str_len > 18) {
-			date_str[str_len] = '\0';
-			return DirectFunctionCall3(timestamptz_in,
-									   CStringGetDatum(date_str),
-									   ObjectIdGetDatum(InvalidOid),
-									   Int32GetDatum(-1));
-
-		}
-
 		char *ref_str = "0000-01-01T00:00:00";
 		long ref_str_len = strlen(ref_str);
 
@@ -657,6 +648,14 @@ date_bound(char *date_str, long str_len,  MinMax minmax){
 	    char *date_in = palloc(date_in_len + 1);
 		memcpy(date_in, date_str, str_len);
 
+		if(str_len > 18) {
+			date_in[str_len] = '\0';
+			return DirectFunctionCall3(timestamptz_in,
+									   CStringGetDatum(date_in),
+									   ObjectIdGetDatum(InvalidOid),
+									   Int32GetDatum(-1));
+
+		}
 
 		if( str_len < ref_str_len){
 			long diff = (ref_str_len - str_len);

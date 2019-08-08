@@ -198,3 +198,30 @@ SELECT knife_extract('{"a":{"b": [{"c": [1,2,3,4]},{"c": [11,22,33,43]}]}}',
 
 SELECT knife_extract('{"a":{"b": [{"c": [1,2,3,4]},{"c": [11,22,33,43]}]}}',
 '[["a","b",2, "c",0]]');
+
+
+
+
+create table test_ts (id text primary key, resource jsonb);
+insert into test_ts (id,resource) values ('1', $$
+{
+"period": {
+  "end": "2019-01-01T12:00:00",
+  "start": "2018-01-01T12:00:00"
+},
+"status": "active",
+"id": "e-1",
+"meta": {
+  "lastUpdated": "2019-08-08T19:07:00.242Z",
+  "versionId": "147"
+},
+"patient": {
+"display": "Pt-1"
+},
+"resourceType": "EpisodeOfCare"
+}
+$$);
+
+SELECT knife_extract_max_timestamptz( resource , '[["period","start"], ["period","end"]]') from test_ts;
+SELECT knife_extract_max_timestamptz( resource , '[["period","start"], ["period","end"]]') from test_ts;
+SELECT resource from test_ts;
