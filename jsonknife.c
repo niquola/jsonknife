@@ -10,6 +10,7 @@
 #include "catalog/pg_type.h"
 #include "catalog/pg_collation.h"
 #include "utils/jsonb.h"
+#include "utils/varlena.h"
 
 #ifndef PG_GETARG_JSONB
 #define PG_GETARG_JSONB(x) DatumGetJsonbP(PG_GETARG_DATUM(x))
