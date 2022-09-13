@@ -73,6 +73,8 @@ SELECT knife_date_bound('2019-07-03T02:28:57.3042803+00:00', 'max') > '2019-07-0
 
 
 SET TIME ZONE 'UTC';
+SELECT knife_date_bound('2000-01-01', 'max');
+SELECT knife_date_bound('2000-01-01', 'min');
 SELECT knife_date_bound('2001-01-01', 'max');
 SELECT knife_date_bound('2001-01-01', 'min');
 SELECT knife_extract_min_timestamptz('{"receivedTime": "2001-01-01"}', '[["receivedTime"]]');
