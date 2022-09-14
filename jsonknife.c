@@ -772,10 +772,7 @@ void reduce_timestamptz(void *acc, JsonbValue *val){
 				int gt = DirectFunctionCall2(timestamptz_cmp_timestamp, *datum, *dacc->acc);
 				/* elog(INFO, "compare %d", gt); */
 				if(gt < 0) {
-					pfree(dacc->acc);
 					dacc->acc = datum;
-				} else {
-					pfree(datum);
 				}
 			} else {
 				dacc->acc = datum;
@@ -784,10 +781,7 @@ void reduce_timestamptz(void *acc, JsonbValue *val){
 			if(dacc->acc != NULL){
 				int gt = DirectFunctionCall2(timestamptz_cmp_timestamp, *datum, *dacc->acc);
 				if(gt > 0) {
-					pfree(dacc->acc);
 					dacc->acc = datum;
-				} else {
-					pfree(datum);
 				}
 			} else {
 				dacc->acc = datum;
@@ -817,12 +811,9 @@ knife_extract_max_timestamptz(PG_FUNCTION_ARGS) {
 	if (acc.acc == NULL) {
 		PG_RETURN_NULL();
 	} else {
-		Datum result = *acc.acc;
-		pfree(acc.acc);
-
 		/* elog(INFO, "knife_extract_max_timestamptz %ld", result); */
 
-		PG_RETURN_NUMERIC(result);
+		PG_RETURN_NUMERIC(*acc.acc);
 	}
 }
 
@@ -842,12 +833,9 @@ knife_extract_min_timestamptz(PG_FUNCTION_ARGS) {
 	if (acc.acc == NULL) {
 		PG_RETURN_NULL();
 	} else {
-		Datum result = *acc.acc;
-		pfree(acc.acc);
-
 		/* elog(INFO, "knife_extract_min_timestamptz %ld", result); */
 
-		PG_RETURN_NUMERIC(result);
+		PG_RETURN_NUMERIC(*acc.acc);
 	}
 }
 
@@ -863,10 +851,8 @@ void reduce_timestamptz_array(void *acc, JsonbValue *val){
 		if (datum == NULL) {
 			tacc->acc = accumArrayResult(tacc->acc, 0, true, TIMESTAMPTZOID, CurrentMemoryContext);
 		} else {
-			Datum result = *datum;
-			pfree(datum);
-			tacc->acc = accumArrayResult(tacc->acc, result,
-										 false, TIMESTAMPTZOID, CurrentMemoryContext);
+			tacc->acc = accumArrayResult(tacc->acc, *datum,
+					false, TIMESTAMPTZOID, CurrentMemoryContext);
 		}
 	}
 }
@@ -906,7 +892,5 @@ knife_date_bound(PG_FUNCTION_ARGS) {
 		PG_RETURN_NULL();
 	}
 
-	Datum result = *datum;
-	pfree(datum);
-	PG_RETURN_TIMESTAMP(result);
+	PG_RETURN_TIMESTAMP(*datum);
 }
