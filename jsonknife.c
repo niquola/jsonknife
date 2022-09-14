@@ -839,7 +839,7 @@ void reduce_timestamptz_array(void *acc, JsonbValue *val){
   /* elog(INFO, "leaf: %s", jsonbv_to_string(NULL, val)); */
 
 	if( val != NULL && jsonbv_type(val) == JVString ) {
-		NullableDatum result = (NullableDatum) date_bound(val->val.string.val, val->val.string.len, min);
+		NullableDatum result = date_bound(val->val.string.val, val->val.string.len, min);
 		tacc->acc = accumArrayResult(tacc->acc,
 									 result.value,
 									 result.isnull, TIMESTAMPTZOID, CurrentMemoryContext);
