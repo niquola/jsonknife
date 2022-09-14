@@ -208,6 +208,18 @@ SELECT knife_date_bound('2019-07-03T02:28:57.3042803+00:00', 'max') > '2019-07-0
 (1 row)
 
 SET TIME ZONE 'UTC';
+SELECT knife_date_bound('2000-01-01', 'max');
+       knife_date_bound       
+------------------------------
+ Sat Jan 01 23:59:59 2000 UTC
+(1 row)
+
+SELECT knife_date_bound('2000-01-01', 'min');
+       knife_date_bound       
+------------------------------
+ Sat Jan 01 00:00:00 2000 UTC
+(1 row)
+
 SELECT knife_date_bound('2001-01-01', 'max');
        knife_date_bound       
 ------------------------------
