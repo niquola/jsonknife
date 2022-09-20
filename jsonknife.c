@@ -24,7 +24,7 @@ static MinMax minmax_from_string(char *s);
 
 typedef enum JValueType {JVObject, JVArray, JVString, JVNumeric, JVBoolean, JVNull} JValueType; 
 
-static Datum date_bound(char *date_str, long str_len,  MinMax minmax);
+static NullableDatum date_bound(char *date_str, long str_len,  MinMax minmax);
 static text *jsonbv_to_text(StringInfoData *out, JsonbValue *v);
 static void initJsonbValue(JsonbValue *jbv, Jsonb *jb);
 static bool knife_match(JsonbValue *value, JsonbValue *pattern);
@@ -43,7 +43,7 @@ typedef struct ArrayAccumulator {
 } ArrayAccumulator;
 
 typedef struct DateAccumulator {
-	Datum  acc;
+	NullableDatum  acc;
 	MinMax minmax;
 } DateAccumulator;
 
@@ -637,8 +637,9 @@ knife_extract_numeric(PG_FUNCTION_ARGS) {
 		PG_RETURN_NULL();
 }
 
-Datum
-date_bound(char *date_str, long str_len,  MinMax minmax){
+NullableDatum
+date_bound(char *date_str, long str_len,  MinMax minmax) {
+	NullableDatum result;
 	if(date_str != NULL) {
 		/* elog(INFO, "date_str: '%s', %d", date_str, str_len ); */
 
@@ -651,11 +652,13 @@ date_bound(char *date_str, long str_len,  MinMax minmax){
 
 		if(str_len > 18) {
 			date_in[str_len] = '\0';
-			return DirectFunctionCall3(timestamptz_in,
+			Datum datum = DirectFunctionCall3(timestamptz_in,
 									   CStringGetDatum(date_in),
 									   ObjectIdGetDatum(InvalidOid),
-									   Int32GetDatum(-1));
-
+											  Int32GetDatum(-1));
+			result.isnull = false;
+			result.value = datum;
+			return result;
 		}
 
 		if( str_len < ref_str_len){
@@ -672,7 +675,9 @@ date_bound(char *date_str, long str_len,  MinMax minmax){
 											 ObjectIdGetDatum(InvalidOid),
 											 Int32GetDatum(-1));
 		if(minmax == min) {
-			return min_date;
+			result.isnull = false;
+			result.value = min_date;
+			return result;
 		} else if (minmax == max ) {
 			Timestamp	max_date;
 			int			tz;
@@ -729,12 +734,17 @@ date_bound(char *date_str, long str_len,  MinMax minmax){
 						(errcode(ERRCODE_DATETIME_VALUE_OUT_OF_RANGE),
 						 errmsg("timestamp out of range")));
 
-			return max_date;
+			result.isnull = false;
+			result.value = TimestampGetDatum(max_date);
+			return result;
 		} else {
 			elog(ERROR, "expected min or max value");
 		}
+	} else {
+		result.isnull = true;
+		return result;
 	}
-	return 0;
+
 }
 
 
@@ -745,25 +755,29 @@ void reduce_timestamptz(void *acc, JsonbValue *val){
 
 	if(val != NULL && val->type == jbvString) {
 
-		Datum date = date_bound(val->val.string.val, val->val.string.len, dacc->minmax);
+		NullableDatum date = date_bound(val->val.string.val, val->val.string.len, dacc->minmax);
+		if (date.isnull) {
+			return;
+		}
 
 		if(dacc->minmax == min) {
-			if(dacc->acc != 0){
-				int gt = DirectFunctionCall2(timestamptz_cmp_timestamp, date, dacc->acc);
+			if(!dacc->acc.isnull){
+				int gt = DirectFunctionCall2(timestamptz_cmp_timestamp, date.value, dacc->acc.value);
 				/* elog(INFO, "compare %d", gt); */
 				if(gt < 0) {
 					dacc->acc = date;
 				}
-			} else if (date != 0) {
+			} else {
 				dacc->acc = date;
 			}
+
 		} else if (dacc->minmax == max ) {
-			if(dacc->acc != 0){
-				int gt = DirectFunctionCall2(timestamptz_cmp_timestamp, date, dacc->acc);
+			if(!dacc->acc.isnull){
+				int gt = DirectFunctionCall2(timestamptz_cmp_timestamp, date.value, dacc->acc.value);
 				if(gt > 0) {
 					dacc->acc = date;
 				}
-			} else if (date != 0){
+			} else {
 				dacc->acc = date;
 			}
 
@@ -785,12 +799,14 @@ knife_extract_max_timestamptz(PG_FUNCTION_ARGS) {
 
 	DateAccumulator acc;
 	acc.minmax = max;
-	acc.acc = 0;
+	NullableDatum datum;
+	datum.isnull = true;
+	acc.acc = datum;
 
 	reduce_paths(value, paths, &acc, reduce_timestamptz);
 
-	if (acc.acc != 0)
-		PG_RETURN_NUMERIC(acc.acc);
+	if (!acc.acc.isnull)
+		PG_RETURN_NUMERIC(acc.acc.value);
 	else
 		PG_RETURN_NULL();
 }
@@ -804,12 +820,14 @@ knife_extract_min_timestamptz(PG_FUNCTION_ARGS) {
 
 	DateAccumulator acc;
 	acc.minmax = min;
-	acc.acc = 0;
+	NullableDatum datum;
+	datum.isnull = true;
+	acc.acc = datum;
 
 	reduce_paths(value, paths, &acc, reduce_timestamptz);
 
-	if (acc.acc != 0)
-		PG_RETURN_NUMERIC(acc.acc);
+	if (!acc.acc.isnull)
+		PG_RETURN_NUMERIC(acc.acc.value);
 	else
 		PG_RETURN_NULL();
 }
@@ -821,9 +839,10 @@ void reduce_timestamptz_array(void *acc, JsonbValue *val){
   /* elog(INFO, "leaf: %s", jsonbv_to_string(NULL, val)); */
 
 	if( val != NULL && jsonbv_type(val) == JVString ) {
+		NullableDatum result = date_bound(val->val.string.val, val->val.string.len, min);
 		tacc->acc = accumArrayResult(tacc->acc,
-                                 (Datum) date_bound(val->val.string.val, val->val.string.len, min),
-                                 false, TIMESTAMPTZOID, CurrentMemoryContext);
+									 result.value,
+									 result.isnull, TIMESTAMPTZOID, CurrentMemoryContext);
 	}
 
 }
@@ -856,10 +875,10 @@ knife_date_bound(PG_FUNCTION_ARGS) {
 	char       *date = text_to_cstring(PG_GETARG_TEXT_P(0));
 	MinMax minmax = minmax_from_string(text_to_cstring(PG_GETARG_TEXT_P(1))); 
 
-	Datum res = date_bound(date, strlen(date), minmax);
+	NullableDatum res = date_bound(date, strlen(date), minmax);
 
-	if(res != 0){
-		return res;
+	if(!res.isnull){
+		return res.value;
 	} else {
 		PG_RETURN_NULL();
 	}
