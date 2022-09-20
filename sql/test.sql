@@ -77,8 +77,13 @@ SELECT knife_date_bound('2000-01-01', 'max');
 SELECT knife_date_bound('2000-01-01', 'min');
 SELECT knife_date_bound('2001-01-01', 'max');
 SELECT knife_date_bound('2001-01-01', 'min');
+SELECT knife_date_bound(NULL, 'min');
+SELECT knife_date_bound(NULL, 'max');
+
 SELECT knife_extract_min_timestamptz('{"receivedTime": "2001-01-01"}', '[["receivedTime"]]');
 SELECT knife_extract_max_timestamptz('{"receivedTime": "2001-01-01"}', '[["receivedTime"]]');
+SELECT knife_extract_min_timestamptz('{}', '[["receivedTime"]]');
+SELECT knife_extract_max_timestamptz('{}', '[["receivedTime"]]');
 
 SELECT knife_extract_text('{"resourceType": "Some", "name": [{"use": "official", "given": ["nicola"], "family": ["Ryzhikov"]}, {"use": "common", "given": ["c", "d"]}]}', '[["name","given"],["name","family"]]');
 
@@ -226,4 +231,7 @@ $$);
 
 SELECT knife_extract_max_timestamptz( resource , '[["period","start"], ["period","end"]]') from test_ts;
 SELECT knife_extract_max_timestamptz( resource , '[["period","start"], ["period","end"]]') from test_ts;
+
+SELECT knife_extract_max_timestamptz( resource , '[["period","ups"], ["period","ups"]]') from test_ts;
+SELECT knife_extract_max_timestamptz( resource , '[["period","ups"], ["period","ups"]]') from test_ts;
 SELECT resource from test_ts;
