@@ -16,6 +16,11 @@
 #define PG_GETARG_JSONB(x) DatumGetJsonbP(PG_GETARG_DATUM(x))
 #endif
 
+typedef struct LocalNullableDatum {
+     Datum       value;
+     bool        isnull;
+} LocalNullableDatum;
+
 typedef void (*reduce_fn)(void *acc, JsonbValue *val);
 
 typedef enum MinMax {min, max} MinMax;  
@@ -24,7 +29,7 @@ static MinMax minmax_from_string(char *s);
 
 typedef enum JValueType {JVObject, JVArray, JVString, JVNumeric, JVBoolean, JVNull} JValueType; 
 
-static NullableDatum date_bound(char *date_str, long str_len,  MinMax minmax);
+static LocalNullableDatum date_bound(char *date_str, long str_len,  MinMax minmax);
 static text *jsonbv_to_text(StringInfoData *out, JsonbValue *v);
 static void initJsonbValue(JsonbValue *jbv, Jsonb *jb);
 static bool knife_match(JsonbValue *value, JsonbValue *pattern);
@@ -43,7 +48,7 @@ typedef struct ArrayAccumulator {
 } ArrayAccumulator;
 
 typedef struct DateAccumulator {
-	NullableDatum  acc;
+	LocalNullableDatum  acc;
 	MinMax minmax;
 } DateAccumulator;
 
@@ -637,9 +642,9 @@ knife_extract_numeric(PG_FUNCTION_ARGS) {
 		PG_RETURN_NULL();
 }
 
-NullableDatum
+LocalNullableDatum
 date_bound(char *date_str, long str_len,  MinMax minmax) {
-	NullableDatum result;
+	LocalNullableDatum result;
 	if(date_str != NULL) {
 		/* elog(INFO, "date_str: '%s', %d", date_str, str_len ); */
 
@@ -755,7 +760,7 @@ void reduce_timestamptz(void *acc, JsonbValue *val){
 
 	if(val != NULL && val->type == jbvString) {
 
-		NullableDatum date = date_bound(val->val.string.val, val->val.string.len, dacc->minmax);
+		LocalNullableDatum date = date_bound(val->val.string.val, val->val.string.len, dacc->minmax);
 		if (date.isnull) {
 			return;
 		}
@@ -799,7 +804,7 @@ knife_extract_max_timestamptz(PG_FUNCTION_ARGS) {
 
 	DateAccumulator acc;
 	acc.minmax = max;
-	NullableDatum datum;
+	LocalNullableDatum datum;
 	datum.isnull = true;
 	acc.acc = datum;
 
@@ -820,7 +825,7 @@ knife_extract_min_timestamptz(PG_FUNCTION_ARGS) {
 
 	DateAccumulator acc;
 	acc.minmax = min;
-	NullableDatum datum;
+	LocalNullableDatum datum;
 	datum.isnull = true;
 	acc.acc = datum;
 
@@ -839,7 +844,7 @@ void reduce_timestamptz_array(void *acc, JsonbValue *val){
   /* elog(INFO, "leaf: %s", jsonbv_to_string(NULL, val)); */
 
 	if( val != NULL && jsonbv_type(val) == JVString ) {
-		NullableDatum result = date_bound(val->val.string.val, val->val.string.len, min);
+		LocalNullableDatum result = date_bound(val->val.string.val, val->val.string.len, min);
 		tacc->acc = accumArrayResult(tacc->acc,
 									 result.value,
 									 result.isnull, TIMESTAMPTZOID, CurrentMemoryContext);
@@ -875,7 +880,7 @@ knife_date_bound(PG_FUNCTION_ARGS) {
 	char       *date = text_to_cstring(PG_GETARG_TEXT_P(0));
 	MinMax minmax = minmax_from_string(text_to_cstring(PG_GETARG_TEXT_P(1))); 
 
-	NullableDatum res = date_bound(date, strlen(date), minmax);
+	LocalNullableDatum res = date_bound(date, strlen(date), minmax);
 
 	if(!res.isnull){
 		return res.value;
